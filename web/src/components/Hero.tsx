@@ -91,7 +91,7 @@ export function Hero() {
               Approach the sentry →
             </a>
             <a
-              href="https://github.com/Builder106/Halberd"
+              href="https://github.com/Builder106/halberd"
               target="_blank"
               rel="noreferrer"
               className="inline-flex items-center px-5 py-2.5 rounded-md font-medium text-(--color-fg) border border-(--color-border) hover:bg-(--color-panel) transition"

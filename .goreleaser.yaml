@@ -117,9 +117,9 @@ release:
   header: |
     Halberd {{ .Tag }} — a JSON-RPC firewall for MCP agents.
 
-    See [README.md](https://github.com/Builder106/Halberd/blob/{{ .Tag }}/README.md)
+    See [README.md](https://github.com/Builder106/halberd/blob/{{ .Tag }}/README.md)
     for the full feature surface, and
-    [docs/threat-model.md](https://github.com/Builder106/Halberd/blob/{{ .Tag }}/docs/threat-model.md)
+    [docs/threat-model.md](https://github.com/Builder106/halberd/blob/{{ .Tag }}/docs/threat-model.md)
     for the threats v0.1 covers.
 
   footer: |

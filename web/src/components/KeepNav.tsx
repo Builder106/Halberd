@@ -141,12 +141,12 @@ export function KeepNav() {
           A JSON-RPC firewall for MCP agents.
           <br />
           <a
-            href="https://github.com/Builder106/Halberd"
+            href="https://github.com/Builder106/halberd"
             target="_blank"
             rel="noreferrer"
             className="text-(--color-fg-2) hover:text-(--color-fg)"
           >
-            github.com/Builder106/Halberd ↗
+            github.com/Builder106/halberd ↗
           </a>
         </div>
       </nav>

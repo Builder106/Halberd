@@ -57,7 +57,7 @@ export function Install() {
             </span>
             Download a release
           </h3>
-          <CopyableBlock>{`curl -L https://github.com/Builder106/Halberd/releases/latest/download/\\
+          <CopyableBlock>{`curl -L https://github.com/Builder106/halberd/releases/latest/download/\\
   halberd_\${VERSION}_\${OS}_\${ARCH}.tar.gz | tar -xz
 ./halberd version`}</CopyableBlock>
         </div>
@@ -73,7 +73,7 @@ export function Install() {
             Build from source
           </h3>
           <CopyableBlock>{`brew install go
-git clone https://github.com/Builder106/Halberd && cd Halberd
+git clone https://github.com/Builder106/halberd && cd Halberd
 go build -o bin/ ./cmd/...
 ./bin/halberd lint policies/mcp-server-postgres.yaml`}</CopyableBlock>
         </div>

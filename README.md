@@ -108,12 +108,12 @@ sequenceDiagram
 
 **Pre-built binaries** for linux/darwin × amd64/arm64 ship with every
 release. Grab the archive matching your platform from the [latest
-release](https://github.com/Builder106/Halberd/releases/latest); each
+release](https://github.com/Builder106/halberd/releases/latest); each
 tarball bundles all four binaries plus `LICENSE`, `README.md`,
 `CONTRIBUTING.md`, the example bundle, and every rule pack.
 
 ```bash
-curl -L https://github.com/Builder106/Halberd/releases/latest/download/halberd_${VERSION}_${OS}_${ARCH}.tar.gz \
+curl -L https://github.com/Builder106/halberd/releases/latest/download/halberd_${VERSION}_${OS}_${ARCH}.tar.gz \
   | tar -xz
 ./halberd version
 ```
@@ -122,7 +122,7 @@ curl -L https://github.com/Builder106/Halberd/releases/latest/download/halberd_$
 
 ```bash
 brew install go
-git clone https://github.com/Builder106/Halberd && cd Halberd
+git clone https://github.com/Builder106/halberd && cd Halberd
 go build -o bin/ ./cmd/...
 
 # Validate a policy bundle:

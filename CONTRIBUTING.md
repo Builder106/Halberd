@@ -102,7 +102,7 @@ git tag -a v0.1.0 -m "v0.1.0"
 git push origin v0.1.0
 
 # 4. Watch the run; the release lands at
-#    https://github.com/Builder106/Halberd/releases/tag/v0.1.0
+#    https://github.com/Builder106/halberd/releases/tag/v0.1.0
 gh run watch
 ```
 

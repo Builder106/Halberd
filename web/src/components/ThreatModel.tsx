@@ -157,7 +157,7 @@ export function Armory() {
         {packs.map((p) => (
           <a
             key={p.name}
-            href={`https://github.com/Builder106/Halberd/blob/main/policies/${p.name}.yaml`}
+            href={`https://github.com/Builder106/halberd/blob/main/policies/${p.name}.yaml`}
             target="_blank"
             rel="noreferrer"
             className="group flex items-start gap-3 p-4 rounded-md border border-(--color-border) bg-(--color-panel)/40 hover:bg-(--color-panel) hover:border-(--color-brass)/40 transition"

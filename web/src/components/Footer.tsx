@@ -5,18 +5,18 @@ export function Footer() {
         <p>
           Halberd — MIT licensed. Source at{" "}
           <a
-            href="https://github.com/Builder106/Halberd"
+            href="https://github.com/Builder106/halberd"
             target="_blank"
             rel="noreferrer"
             className="text-(--color-fg-2) hover:text-(--color-fg) underline underline-offset-2"
           >
-            github.com/Builder106/Halberd
+            github.com/Builder106/halberd
           </a>
           .
         </p>
         <nav className="flex gap-5">
           <a
-            href="https://github.com/Builder106/Halberd/blob/main/docs/threat-model.md"
+            href="https://github.com/Builder106/halberd/blob/main/docs/threat-model.md"
             target="_blank"
             rel="noreferrer"
             className="hover:text-(--color-fg-2) transition"
@@ -24,7 +24,7 @@ export function Footer() {
             threat model
           </a>
           <a
-            href="https://github.com/Builder106/Halberd/blob/main/docs/policy-dsl.md"
+            href="https://github.com/Builder106/halberd/blob/main/docs/policy-dsl.md"
             target="_blank"
             rel="noreferrer"
             className="hover:text-(--color-fg-2) transition"
@@ -32,7 +32,7 @@ export function Footer() {
             policy DSL
           </a>
           <a
-            href="https://github.com/Builder106/Halberd/blob/main/JOURNAL.md"
+            href="https://github.com/Builder106/halberd/blob/main/JOURNAL.md"
             target="_blank"
             rel="noreferrer"
             className="hover:text-(--color-fg-2) transition"
@@ -40,7 +40,7 @@ export function Footer() {
             journal
           </a>
           <a
-            href="https://github.com/Builder106/Halberd/releases"
+            href="https://github.com/Builder106/halberd/releases"
             target="_blank"
             rel="noreferrer"
             className="hover:text-(--color-fg-2) transition"
