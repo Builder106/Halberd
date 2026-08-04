@@ -382,7 +382,7 @@ four tools each embody one of the v0.1 threat categories. Pairs with
 `halberd-stdio` and a matched `policies/halberd-honeypot.yaml` bundle for
 a one-command end-to-end demo:
 
-```
+```bash
 halberd-stdio --policy policies/halberd-honeypot.yaml --audit out.jsonl
               -- halberd-honeypot
 ```
