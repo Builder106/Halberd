@@ -71,7 +71,7 @@ itself — it's the boundary between the model and the tools it can call.
 Halberd defends that boundary against five concrete threats:
 
 | # | Threat | How it shows up |
-|---|---|---|
+| --- | --- | --- |
 | T1 | Tool poisoning | A compromised MCP server returns a response containing role-tag spoofing or ANSI escapes that hijack the agent's next turn |
 | T2 | Argument injection | The agent is tricked into calling a legitimate tool with hostile args (`execute_sql` with `DROP TABLE`, `git_clone` with `--upload-pack`) |
 | T3 | Out-of-scope I/O | A tool reads `/etc/shadow`, hits a private IP, or writes outside its sandbox |
@@ -132,7 +132,7 @@ go build -o bin/ ./cmd/...
 ### Bundled rule packs
 
 | Pack | Threats covered | Note |
-|---|---|---|
+| --- | --- | --- |
 | [`mcp-server-postgres.yaml`](policies/mcp-server-postgres.yaml) | T2 (DROP/TRUNCATE/COPY-from-program/`pg_read_server_files`), T5 (secrets in result rows) | Ready to use as-is |
 | [`mcp-server-filesystem.yaml`](policies/mcp-server-filesystem.yaml) | T2 (path traversal, absolute paths, home-dir expansion, null-byte injection), T5 (secrets in file contents) | Array-arg tools (`read_multiple_files`, `edit_file`) intentionally denied — v0.1 DSL is scalar-only |
 | [`mcp-server-git.yaml`](policies/mcp-server-git.yaml) | T2 (`--upload-pack=…`-style long-opt smuggling in ref/branch names; path traversal in `repo_path`), T5 | State-mutating tools (`commit`, `add`, `reset`, `init`) denied by default |
@@ -236,7 +236,7 @@ Full reference: [docs/policy-dsl.md](docs/policy-dsl.md).
 ## Roadmap
 
 | Phase | Status | Outcome |
-|---|---|---|
+| --- | --- | --- |
 | **P1** — HTTP reverse proxy + audit bus | shipped in v0.1 | `halberd-http` forwards JSON-RPC, logs every decision |
 | **P2** — Policy engine, deny-pattern blocking, T2 + T4 coverage | shipped in v0.1 | YAML bundles, regex denylist, capability-creep guard |
 | **P3** — stdio transport | shipped in v0.1 | `halberd-stdio` MITMs local MCP servers (Claude Desktop, Cursor, Windsurf) over line-delimited JSON-RPC |
@@ -248,7 +248,7 @@ Full reference: [docs/policy-dsl.md](docs/policy-dsl.md).
 The policy engine is the hot path. Targets enforced in CI:
 
 | Metric | Ceiling |
-|---|---|
+| --- | --- |
 | p50 added latency per `tools/call` | 200 µs |
 | p99 added latency | 1 ms |
 | Allocations per call | 50 |

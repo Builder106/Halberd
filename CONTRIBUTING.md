@@ -113,4 +113,4 @@ the actual release version. Snapshot builds report `<next>-next-<sha>`.
 ## Reporting security issues
 
 Do **not** open a public GitHub issue for a vulnerability in Halberd itself.
-Email vaughanolayinka@gmail.com with the subject prefix `[halberd security]`.
+Email <vaughanolayinka@gmail.com> with the subject prefix `[halberd security]`.

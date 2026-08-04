@@ -23,7 +23,7 @@ response_filters:               # optional; absent = no response inspection
 ```
 
 | Key | Required | Notes |
-|---|---|---|
+| --- | --- | --- |
 | `version` | yes | Must be `1`. Future-incompatible changes bump this. |
 | `server` | yes | Free-form identifier; appears in audit-log entries. |
 | `tools` | yes | List of tool rules. Empty list is valid but then every `tools/call` is rejected when `defaults.unknown_tool = deny`. |
@@ -77,7 +77,7 @@ sanitizes every string leaf. The envelope's `jsonrpc`, `id`, and `error`
 fields round-trip verbatim — Halberd does not touch protocol metadata.
 
 | Field | Effect |
-|---|---|
+| --- | --- |
 | `strip_ansi_escapes` | Removes CSI (`\x1b[...]`) and OSC (`\x1b]...\x07`) escape sequences. Tool output has no legitimate reason to contain terminal-control codes; their presence is a strong tool-poisoning signal. |
 | `strip_zero_width` | Removes U+200B/U+200C/U+200D/U+2060/U+FEFF. These are invisible but can carry steganographic payloads or split injection markers across log scrapers. |
 | `secret_scanners` | List of built-in detectors that replace matches with `[REDACTED]`. |

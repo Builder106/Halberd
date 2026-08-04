@@ -36,7 +36,7 @@ honeypot never sees the query. The block is in `halberd.jsonl`.
 ## Threat coverage per tool
 
 | Tool | Threat | What the tool does |
-|---|---|---|
+| --- | --- | --- |
 | `get_weather(city)` | **T1** (tool poisoning) | Returns a response containing ANSI color escapes, a zero-width space splitting `<\|im_start\|>`, and a role-tag-spoofed system prompt. Halberd's response inspector should strip the ANSI and zero-width chars before the agent sees the text. |
 | `execute_sql(query)` | **T2** (argument injection) | Echoes any query back as a success result. The point is to verify request-side `deny_patterns` block dangerous SQL *before* it reaches this function — by the time execution lands here, it's already too late. |
 | `read_file(path)` | **T2 + T3** (argument injection + out-of-scope I/O) | Opens whatever path the agent supplies. No allowlist, no path-traversal guard, no symlink resolution. Halberd's filesystem rule pack must block traversal and absolute-path attempts upstream. |

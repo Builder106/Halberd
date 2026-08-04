@@ -89,6 +89,7 @@ and dropdowns that, when expanded, showed nothing. (Tested
 end-to-end on the live README; user caught it within minutes.)
 
 What actually works on GitHub README:
+
 - `![alt](path/to/file.gif)` — GIFs render and autoplay.
 - `<video src="...">` — silently stripped by the sanitizer.
 - `https://github.com/<owner>/<repo>/raw/...` URLs are fine for
@@ -107,6 +108,7 @@ inline; each clip's `<sub>` link offers the mp4 alongside for
 people who want pixel-perfect quality.
 
 File sizes per clip:
+
 - mp4 (1440×900, libx264 -crf 23 -tune stillimage): ~340–550 KiB
 - GIF (1280px, fps 12, palette 192): ~2.2–5.0 MiB
 
@@ -195,6 +197,7 @@ Decisions worth recording:
   CLAUDE.md spec spells out, learned in practice.
 
 Total README media inventory now:
+
 - Banner SVG (existing)
 - Mermaid sequence diagram (existing)
 - Playground hero screenshot (Phase 1)
@@ -427,6 +430,7 @@ scalar-only), and the github pack ships with a `your-org` placeholder
 operators must edit before deploying.
 
 Hardening that came along for the ride:
+
 - **`internal/audit/bus_test.go`**: 9 tests covering JSONL framing, time
   stamping, drop-when-full, post-Stop drop semantics, Stop idempotence,
   ctx-deadline honoring, nil-ctx safety, and a conservation property
