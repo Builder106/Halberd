@@ -4,6 +4,10 @@
 > things happen — retrospectives need this raw material to land.
 > Reverse-chronological; one paragraph max per entry.
 
+## 2026-08-07 — Firewall architecture specification and feature audit #milestone
+
+Executed a feature audit across the Go reverse proxy (`cmd/halberd-http`, `cmd/halberd-stdio`), policy engine (`internal/policy`), and WebAssembly bridge (`cmd/halberd-wasm`). Created `docs/FIREWALL_ARCHITECTURE.md` documenting threat mitigations T1 through T5, wax-seal verdict semantics (Refused, Pass Granted, Amended), and the client-side WASM engine architecture. Scheduled T3 out-of-scope I/O network guard enhancements and interactive browser ruleset builder UI for development.
+
 ## 2026-05-27 — Web type refinement: Manrope body + JetBrains Mono + parchment grain #decision
 
 A type pass on the keep-tour brand, deliberately not a redesign. The previous build defined a ceremonial display-serif (Cormorant Garamond) but left the body sans and mono as system-font fallbacks — Manrope + JetBrains Mono now load via `next/font/google` so the brand carries through the body copy, the pipeline glyphs (`tools/call → policy → audit → upstream`), and every `<code>` block. Brass palette grew three stops: `--color-brass-lit` for candlelit hovers, `--color-brass-weathered` for aged seals/wordmarks, `--color-candle` (#f5c97a) for hearth-glow accents. The body now carries a fixed SVG parchment-grain layer warmed toward the brass channel plus a bottom-left candlelight wash, so the dark backdrop reads as torchlit stone instead of flat slate. Cormorant gained italic style (the "Every request must pass the gate." tagline was already italic; now it actually renders that way). **Why:** the Roman-numeral keep tour, wax-seal verdicts, and Cormorant headings were already strong — the body type was the only piece still reading as system default. **How to apply:** all new components should consume `var(--font-sans)` / `var(--font-mono)` / `var(--font-serif)` from globals; do not hardcode font stacks. The `.parchment-grain` and `.rule-brass` utility classes are opt-in for components that want them.
