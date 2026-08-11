@@ -22,7 +22,12 @@ jobs:
           GITLEAKS_NOTIFY_USER_LIST: ""
 
   test:
-    runs-on: ubuntu-24.04
+    name: Test (${{ matrix.os }})
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-24.04, macos-14, windows-latest]
+    runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v7
 
@@ -35,7 +40,10 @@ jobs:
           go-version: 1.25.12
           cache: true
 
+      # go mod tidy's output can differ by OS line-ending, so this
+      # verification step only needs to run once — Linux is authoritative.
       - name: go mod tidy (verify)
+        if: runner.os == 'Linux'
         run: |
           go mod tidy
           git diff --exit-code go.mod go.sum
@@ -47,10 +55,11 @@ jobs:
         run: go test -race -count=1 ./...
 
       - name: lint policy bundles
+        shell: bash
         run: |
-          go build -o /tmp/halberd ./cmd/halberd
+          go build -o ${{ runner.temp }}/halberd${{ runner.os == 'Windows' && '.exe' || '' }} ./cmd/halberd
           for f in policies/*.yaml halberd.example.yaml; do
-            /tmp/halberd lint "$f"
+            "${{ runner.temp }}/halberd${{ runner.os == 'Windows' && '.exe' || '' }}" lint "$f"
           done
 
   bench:
