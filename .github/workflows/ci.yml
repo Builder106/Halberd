@@ -57,9 +57,9 @@ jobs:
       - name: lint policy bundles
         shell: bash
         run: |
-          go build -o ${{ runner.temp }}/halberd${{ runner.os == 'Windows' && '.exe' || '' }} ./cmd/halberd
+          go build -o "$RUNNER_TEMP/halberd${{ runner.os == 'Windows' && '.exe' || '' }}" ./cmd/halberd
           for f in policies/*.yaml halberd.example.yaml; do
-            "${{ runner.temp }}/halberd${{ runner.os == 'Windows' && '.exe' || '' }}" lint "$f"
+            "$RUNNER_TEMP/halberd${{ runner.os == 'Windows' && '.exe' || '' }}" lint "$f"
           done
 
   bench:
