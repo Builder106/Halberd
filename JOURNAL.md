@@ -10,15 +10,15 @@ Executed a feature audit across the Go reverse proxy (`cmd/halberd-http`, `cmd/h
 
 ## 2026-05-27 — Web type refinement: Manrope body + JetBrains Mono + parchment grain #decision
 
-A type pass on the keep-tour brand, deliberately not a redesign. The previous build defined a ceremonial display-serif (Cormorant Garamond) but left the body sans and mono as system-font fallbacks — Manrope + JetBrains Mono now load via `next/font/google` so the brand carries through the body copy, the pipeline glyphs (`tools/call → policy → audit → upstream`), and every `<code>` block. Brass palette grew three stops: `--color-brass-lit` for candlelit hovers, `--color-brass-weathered` for aged seals/wordmarks, `--color-candle` (#f5c97a) for hearth-glow accents. The body now carries a fixed SVG parchment-grain layer warmed toward the brass channel plus a bottom-left candlelight wash, so the dark backdrop reads as torchlit stone instead of flat slate. Cormorant gained italic style (the "Every request must pass the gate." tagline was already italic; now it actually renders that way). **Why:** the Roman-numeral keep tour, wax-seal verdicts, and Cormorant headings were already strong — the body type was the only piece still reading as system default. **How to apply:** all new components should consume `var(--font-sans)` / `var(--font-mono)` / `var(--font-serif)` from globals; do not hardcode font stacks. The `.parchment-grain` and `.rule-brass` utility classes are opt-in for components that want them.
+A type pass on the keep-tour brand, deliberately not a redesign. The previous build defined a ceremonial display-serif (Cormorant Garamond) but left the body sans and mono as system-font fallbacks — Manrope + JetBrains Mono now load via `next/font/google` so the brand carries through the body copy, the pipeline glyphs (`tools/call → policy → audit → upstream`), and every `<code>`block. Brass palette grew three stops:`--color-brass-lit`for candlelit hovers,`--color-brass-weathered`for aged seals/wordmarks,`--color-candle`(#f5c97a) for hearth-glow accents. The body now carries a fixed SVG parchment-grain layer warmed toward the brass channel plus a bottom-left candlelight wash, so the dark backdrop reads as torchlit stone instead of flat slate. Cormorant gained italic style (the "Every request must pass the gate." tagline was already italic; now it actually renders that way). **Why:**the Roman-numeral keep tour, wax-seal verdicts, and Cormorant headings were already strong — the body type was the only piece still reading as system default.**How to apply:** all new components should consume`var(--font-sans)`/`var(--font-mono)`/`var(--font-serif)`from globals; do not hardcode font stacks. The`.parchment-grain`and`.rule-brass` utility classes are opt-in for components that want them.
 
 ## 2026-05-27 — WASM-bridge contract suite (Playwright QA) #milestone #decision
 
-The Gherkin demo suite tests the playground UI *through* the bridge; it won't fail on a schema change if the UI still happens to render. This new QA layer tests the bridge in isolation — loads `/` in headless Chromium, waits for `halberd-wasm` to register on `globalThis.halberd`, then calls `packs()` / `evaluateRequest()` / `evaluateResponse()` directly and asserts the JSON shapes. That's the layer that catches drift between `internal/policy` and `cmd/halberd-wasm`, which the Go tests can't (they don't compile to WASM). Eight tests in `web/e2e/qa/specs/wasm-bridge.spec.ts`: five packs returned, DROP TABLE blocked + safe SELECT allowed under postgres, AWS/GitHub/RSA redaction under the honeypot, error envelope for an unknown pack, malformed JSON-RPC handled without crashing, multi-byte unicode round-trips clean, version string advertised. Config split per the baseline — `playwright.qa.config.ts` is parallel / headless / no video / retries-on-flake, the exact inverse of the demo config. `npm run test:qa` boots `next start` via Playwright's webServer hook; CI's `web` job runs it after `next build`. 25s end-to-end with the build folded in.
+The Gherkin demo suite tests the playground UI *through* the bridge; it won't fail on a schema change if the UI still happens to render. This new QA layer tests the bridge in isolation — loads `/`in headless Chromium, waits for`halberd-wasm`to register on`globalThis.halberd`, then calls `packs()`/`evaluateRequest()`/`evaluateResponse()`directly and asserts the JSON shapes. That's the layer that catches drift between`internal/policy`and`cmd/halberd-wasm`, which the Go tests can't (they don't compile to WASM). Eight tests in `web/e2e/qa/specs/wasm-bridge.spec.ts`: five packs returned, DROP TABLE blocked + safe SELECT allowed under postgres, AWS/GitHub/RSA redaction under the honeypot, error envelope for an unknown pack, malformed JSON-RPC handled without crashing, multi-byte unicode round-trips clean, version string advertised. Config split per the baseline — `playwright.qa.config.ts`is parallel / headless / no video / retries-on-flake, the exact inverse of the demo config.`npm run test:qa`boots`next start`via Playwright's webServer hook; CI's`web`job runs it after`next build`. 25s end-to-end with the build folded in.
 
 ## 2026-05-27 — Vercel kept showing the default triangle: it scans /favicon.ico, not the SVG #incident
 
-The dashboard project card kept rendering Vercel's own triangle even though `public/favicon.svg` was wired into `metadata.icons`. Cause: the create-next-app scaffold's `favicon.ico` was still sitting in `src/app/`, served at `/favicon.ico` by App Router's auto-link convention, and Vercel's project-card avatar scanner pulls `/favicon.ico` specifically — it doesn't read the SVG. Rendered a multi-res (16/32/48/64) `.ico` from `assets/favicon.svg` via `rsvg-convert` + `magick` and dropped it in. Modern browsers still prefer the SVG linked alongside in `layout.tsx`; the `.ico` is only there for clients that won't honor SVG and for Vercel's scanner. Lesson: a metadata-linked SVG favicon isn't enough — anything that hardcodes the `/favicon.ico` path (Vercel's scanner here) needs the real file present.
+The dashboard project card kept rendering Vercel's own triangle even though `public/favicon.svg`was wired into`metadata.icons`. Cause: the create-next-app scaffold's `favicon.ico`was still sitting in`src/app/`, served at `/favicon.ico`by App Router's auto-link convention, and Vercel's project-card avatar scanner pulls`/favicon.ico`specifically — it doesn't read the SVG. Rendered a multi-res (16/32/48/64)`.ico`from`assets/favicon.svg`via`rsvg-convert`+`magick`and dropped it in. Modern browsers still prefer the SVG linked alongside in`layout.tsx`; the `.ico`is only there for clients that won't honor SVG and for Vercel's scanner. Lesson: a metadata-linked SVG favicon isn't enough — anything that hardcodes the`/favicon.ico` path (Vercel's scanner here) needs the real file present.
 
 ## 2026-05-27 — @vercel/analytics + @vercel/speed-insights wired in #milestone
 
@@ -28,10 +28,13 @@ in the root layout. Build clean, deploy green (`c33c02c`).
 State as of this commit:
 
 - **Speed Insights**: fully live. `/_vercel/speed-insights/script.js`
+
   serves; the SpeedInsights component fires Web Vitals beacons on
   every visit. Dashboard at `vercel.com/sankofa-forge/halberd/speed-
   insights` will populate as traffic arrives.
+
 - **Web Analytics**: code wired, receiving endpoint still 404s. The
+
   project record has `webAnalytics.id` populated but on the Hobby
   plan the `/_vercel/insights/script.js` endpoint only flips live
   after a manual "Enable Web Analytics" click in the dashboard.
@@ -54,14 +57,14 @@ Caught when I checked the Vercel dashboard — the deploys list was
 a column of red.
 
 Root cause: when I ran `vercel link --project halberd` and
-`vercel deploy --prod` from `web/`, the CLI link wrote
+`vercel deploy --prod`from`web/`, the CLI link wrote
 `.vercel/project.json` pointing at the right project but the
 **project's `rootDirectory` setting on Vercel's side stayed at
 the repo root**. The GitHub integration (which Vercel set up when
 the project was created) honors that server-side setting, not the
 local `.vercel/project.json`. So:
 
-- CLI deploys from `web/` → succeed (build runs in `web/`)
+- CLI deploys from `web/`→ succeed (build runs in`web/`)
 - Git push → fail (build runs in repo root, no Next.js there)
 
 Fixed via the v9 projects API:
@@ -76,10 +79,13 @@ curl -X PATCH "https://api.vercel.com/v9/projects/$PROJECT_ID?teamId=$TEAM_ID" \
 Next deploy went green in 37s. Two lessons:
 
 1. **CLI `vercel link` only configures the local CLI**, not the
+
    git integration's build settings. For a Next.js app in a
    subdirectory of a repo, `rootDirectory` must be set
    server-side too.
+
 2. **Watch the Vercel deployments tab, not just halberd-keep**.
+
    The alias keeps serving the last-good deploy even when 11
    hours of pushes have been failing — there's no visible signal
    on the live site that anything is wrong.
@@ -97,8 +103,11 @@ What actually works on GitHub README:
 - `![alt](path/to/file.gif)` — GIFs render and autoplay.
 - `<video src="...">` — silently stripped by the sanitizer.
 - `https://github.com/<owner>/<repo>/raw/...` URLs are fine for
+
   images but not honored as `<video>` sources.
+
 - Drag-and-drop video into an issue/PR comment yields a
+
   `user-attachments/assets/...` URL that DOES work inside a
   `<video>` tag — but that's only available for user-attached
   uploads, not repo-committed files.
@@ -130,6 +139,7 @@ a click meant first-time visitors saw zero motion before scrolling
 past the demo section. Switched both moves:
 
 - **GIF → mp4 (H.264 stillimage tune).** The reporter was already
+
   producing mp4 as the intermediate before palette-converting to
   GIF; now it stops at mp4 and the GIF step is gone. Crisp 1440×900
   output at ~500 KiB per clip — *smaller* than the lower-res GIFs
@@ -137,22 +147,27 @@ past the demo section. Switched both moves:
   recordings with text antialiasing far better than GIF's 256-colour
   palette ever could. Source-of-truth `.cast` for the terminal demo
   re-encoded the same way (187 KiB GIF → 171 KiB mp4).
+
 - **One hero demo inline, alternates in `<details>`.** The Refused
+
   / DROP TABLE clip is the strongest single artefact, so it
   autoplays muted-and-looped right under the wax-seal triptych. The
   other three (path-traversal refusal, response amendment, safe
-  SELECT) stay in `<details>` with `preload="metadata"` and
+  SELECT) stay in `<details>`with`preload="metadata"` and
   `controls` so they don't ship bytes until expanded.
 
 Two implementation footguns worth recording:
 
 - **playwright-bdd drops `=`-bearing Gherkin tags.** Tried
+
   `@slug=refused-drop-table` for stable filename mapping; the
   generated test files never saw the tags. Switched to a scenario-
   title → slug lookup table in the reporter (uglier but
   bulletproof). Note for future BDD work: tag values via `=` are
   not portable across BDD libraries.
+
 - **GitHub README `<video src>` needs the raw URL, not a relative
+
   path.** GitHub serves images at relative paths through camo but
   refuses to do the same for video; the workaround is to point
   src at `https://github.com/<owner>/<repo>/raw/main/<path>`.
@@ -174,6 +189,7 @@ under collapsed `<details>` clusters:
 Decisions worth recording:
 
 - **Plain Playwright was wrong; Gherkin is right for this repo.** I
+
   initially started a plain `@playwright/test` setup arguing BDD
   boilerplate wasn't worth it for four scenarios. Course-corrected:
   for a public security repo the `.feature` files *are* the
@@ -181,21 +197,29 @@ Decisions worth recording:
   TypeScript readers. The boilerplate buys contributor readability,
   not execution model. Lesson: don't optimize past spec compliance
   without checking the spec's *reason*.
+
 - **`@slug=…` Gherkin tags** map scenarios to stable GIF filenames.
+
   Without them, the reporter's default slug would be the verbose
   feature-plus-scenario path; with them, `README.md` can reference
   `refused-drop-table.gif` and re-runs land at the same path.
+
 - **Two warmups was the floor; three is safer.** One run still hit
+
   the 0-byte first-test bug on slot 3 even with two warmups. The
   reporter's defensive `statSync(path).size === 0` check catches the
   spillover and discards instead of shipping a broken GIF. Worth
   remembering: warmup count is best-effort, not a guarantee.
+
 - **`test.afterEach` at module load breaks playwright-bdd's loader.**
+
   bddgen loads step files outside the test runtime, so a top-level
-  `test.afterEach` in `fixtures.ts` throws on import. Moved the
+  `test.afterEach`in`fixtures.ts` throws on import. Moved the
   tail-frame hold to a BDD `After` hook in its own
   `hooks.steps.ts` file.
+
 - **Reporter defers everything to `onEnd`.** `onTestEnd` fires
+
   before Playwright flushes the video file to disk; only by `onEnd`
   is every webm guaranteed to be written. Same lesson the global
   CLAUDE.md spec spells out, learned in practice.
@@ -249,17 +273,22 @@ git, octofoil for github, bee for honeypot).
 Three calls worth recording:
 
 - **Theme at moments of drama, not everywhere.** Section headers,
+
   decision verdicts, and rule-pack identity get the medieval
   treatment. Body copy, install commands, code blocks, and threat
   descriptions stay in the existing crisp sans for legibility.
   Picked over "woven motifs" (too restrained) and "auditor's ledger"
   (too localized) options.
+
 - **Refined display serif, not faux-medieval.** Cormorant Garamond
+
   via next/font/google for ceremonial moments. Cinzel / Uncial /
   blackletter would have tipped into Renaissance Fair cosplay. The
   brass-wax-parchment palette additions live alongside the existing
   cyan/purple tech accents — the contrast IS the brand.
+
 - **Saved the direction to memory.** Future sessions could otherwise
+
   drift back to the generic cyberpunk-tech default. The memory entry
   at `halberd-keep-tour-brand.md` locks in the section names, palette,
   and the "no faux-medieval fonts / no parchment textures" rules.
@@ -285,25 +314,32 @@ org-allowlist misses, secret-laden responses.
 Decisions worth recording:
 
 - **WASM commits to git, not built on Vercel.** Vercel's build env is
+
   Node-first; bootstrapping Go in the build command is fragile.
   Committing the 4.6 MiB `web/public/halberd.wasm` (compresses to
   ~1.4 MiB over the wire with Vercel's brotli) is the pragmatic
   trade-off. CI's `web` job rebuilds the WASM on every push and fails
   loudly if the committed artifact drifts from a fresh build — so the
   playground can't quietly ship stale rules.
-- **`//go:embed` forbids `..` paths.** The rule packs live at the repo
+
+- **`//go:embed`forbids`..` paths.** The rule packs live at the repo
+
   root in `policies/`, but `cmd/halberd-wasm/main.go` needs to embed
   them. `scripts/build-wasm.sh` stages a copy into
   `cmd/halberd-wasm/policies/` (gitignored) before building. Cleaner
   than restructuring the repo around the WASM build.
+
 - **pnpm 11's build-script approval blocks scaffolding.** `create-next-app`
+
   scaffolds with pnpm by default; pnpm 11 then refuses `sharp` and
-  `unrs-resolver` build scripts without explicit `onlyBuiltDependencies`
-  approval — the old `pnpm` field in `package.json` is deprecated and
+  `unrs-resolver`build scripts without explicit`onlyBuiltDependencies`
+  approval — the old `pnpm`field in`package.json` is deprecated and
   the workspace-yaml location only works inside a workspace root.
   Switched to npm; `package-lock.json` checked in. v0.1 doesn't need
   pnpm's perf wins.
+
 - **Vercel auto-generated alias is `halberd-six.vercel.app`.** Plain
+
   `halberd.vercel.app` was taken on the platform, so the project gets
   `halberd-six` as its default alias. Three stable aliases land
   automatically: `halberd-six`, `halberd-sankofa-forge`, and
@@ -318,7 +354,9 @@ gets a `demo - live` badge.
 
 Halberd's goreleaser pipeline can do everything except set the GitHub
 repo's social-preview image — that's still a web-UI-only operation in
-2026. Filed a refreshed feature request at
+
+1. Filed a refreshed feature request at
+
 [community/community#197021](https://github.com/orgs/community/discussions/197021)
 (Apps, API and Webhooks → Product Feedback → API) referencing the
 3.5-year-old precedent at #32166 and framing the 2026 use case
@@ -344,12 +382,15 @@ discussion creation against any community repo.
 Two release-prep items shipped:
 
 - **Social-preview card** at `assets/social-preview.{svg,png}`, 1200×630.
+
   Adapts the existing banner's color palette (dark slate, purple→cyan
   accent stripe, halberd silhouette) to the wider 1.9:1 ratio used by
   link-share cards. GitHub's REST API doesn't expose social-preview as
   a settable field — needs manual upload via Settings → Social preview.
   Documented in the README's branding-assets section.
+
 - **goreleaser** config at `.goreleaser.yaml` + release workflow at
+
   `.github/workflows/release.yml`. Tag-driven (`v*`); builds 4 binaries
   × 4 OS/arch targets (linux/darwin × amd64/arm64), bundles each archive
   with LICENSE/README/CONTRIBUTING + every rule pack + the example
@@ -360,12 +401,15 @@ Two release-prep items shipped:
 
 Two decisions worth recording:
 
-- **`const version` → `var version`.** Goreleaser injects the tag value
+- **`const version`→`var version`.** Goreleaser injects the tag value
+
   via `-ldflags "-X main.version=…"`, which only works on package vars.
   cmd/halberd and cmd/halberd-honeypot both updated. Snapshot dry-run
   confirms the binary now reports the resolved tag (or `<next>-next-<sha>`
   for snapshot builds).
+
 - **No Docker image yet.** Goreleaser can build images, but Halberd is
+
   a process-mode proxy that mostly runs alongside its host (Claude
   Desktop, Cursor, etc.), not in a container. Docker shippable later
   when there's a real ops story for the remote / k8s deployment.
@@ -377,13 +421,13 @@ working. Ready for the first real tag push.
 
 ## 2026-05-26 — GitGuardian fired on the honeypot's RSA fixture five minutes after push #incident
 
-The honeypot's `list_users` tool returned a fake RSA block as a T5 fixture — `MIIBOgIBAAJBAKj34Gkx...`, a 64-char base64-shaped body that's far too short to be a real key but realistic enough that GitGuardian's source-level scanner fired on it. The alert (incident #33200784) opened on the public repo within five minutes of the push. Fix: swapped the body for a literal `...[FIXTURE_NOT_A_REAL_KEY]` marker — the same shape `internal/policy/sanitize_test.go` already uses without ever tripping a scanner — while keeping the `BEGIN/END` markers so Halberd's runtime `rsa_private_key` scanner still finds and redacts the block in tool output. That's the distinction the comment now spells out: source-level secret scanners and runtime redaction want opposite things from a fixture, and the source scanner wins because it files an incident publicly. Verified post-fix that `list_users` is still redacted end-to-end through `halberd-stdio` + the matched bundle.
+The honeypot's `list_users`tool returned a fake RSA block as a T5 fixture —`MIIBOgIBAAJBAKj34Gkx...`, a 64-char base64-shaped body that's far too short to be a real key but realistic enough that GitGuardian's source-level scanner fired on it. The alert (incident #33200784) opened on the public repo within five minutes of the push. Fix: swapped the body for a literal `...[FIXTURE_NOT_A_REAL_KEY]`marker — the same shape`internal/policy/sanitize_test.go`already uses without ever tripping a scanner — while keeping the`BEGIN/END`markers so Halberd's runtime`rsa_private_key`scanner still finds and redacts the block in tool output. That's the distinction the comment now spells out: source-level secret scanners and runtime redaction want opposite things from a fixture, and the source scanner wins because it files an incident publicly. Verified post-fix that`list_users`is still redacted end-to-end through`halberd-stdio` + the matched bundle.
 
 ## 2026-05-26 — halberd-honeypot ships #milestone
 
 Added `cmd/halberd-honeypot`: a minimal stdio MCP server (~200 LOC) whose
 four tools each embody one of the v0.1 threat categories. Pairs with
-`halberd-stdio` and a matched `policies/halberd-honeypot.yaml` bundle for
+`halberd-stdio`and a matched`policies/halberd-honeypot.yaml` bundle for
 a one-command end-to-end demo:
 
 ```bash
@@ -400,16 +444,21 @@ response with three redactions (AWS / GitHub / RSA), full audit trail.
 Three decisions worth recording:
 
 - **Not in `testdata/`, in `cmd/`.** `testdata/` is Go-specific magic
+
   that gets excluded from `go build ./...`. The honeypot is a real
   binary that's *intended* to be built and run — just never against
   production data. Calling it `cmd/halberd-honeypot` plus a banner that
   prints "VULNERABLE BY DESIGN" on startup communicates intent better
   than burying it in a fixture directory.
+
 - **No build tag.** I considered `//go:build honeypot` to keep it out
+
   of default builds. Rejected — the honeypot is a positive feature
   (the test fixture that proves the whole stack works), not an
   embarrassment to hide. Documented prominently, no gating.
+
 - **`tools/list_changed` deferred.** T4 (capability creep) needs a
+
   stateful interaction sequence: server advertises N tools, agent calls
   one, server then pushes a notification adding tool N+1. The honeypot
   doesn't simulate this in v0.1 — its tool list is static. v0.2 adds a
@@ -436,11 +485,14 @@ operators must edit before deploying.
 Hardening that came along for the ride:
 
 - **`internal/audit/bus_test.go`**: 9 tests covering JSONL framing, time
+
   stamping, drop-when-full, post-Stop drop semantics, Stop idempotence,
   ctx-deadline honoring, nil-ctx safety, and a conservation property
   (sent == written + dropped) under 16-goroutine × 256-record load.
   Closed the bus's zero-coverage gap.
+
 - **CI actions bumped to Node-24-native majors** ahead of the June 2,
+
   2026 deadline: `actions/checkout@v5`, `actions/setup-go@v6`,
   `actions/upload-artifact@v5`. The deprecation warnings drop;
   `golangci/golangci-lint-action@v7` stays put for now (v7 was the
@@ -475,17 +527,22 @@ tool, suppressing the response leaves it confused; redacting bad bits
 preserves the call's usefulness. Three load-bearing decisions:
 
 - **JSON-tree walk, not raw-byte regex.** ANSI escapes get encoded as
+
   `` on the wire, not raw ESC. Zero-width chars may be raw UTF-8
   *or* `​`. Scanning raw bytes would miss the JSON-encoded forms.
   The walker unmarshals the envelope, recursively descends `result`,
   sanitizes each string leaf, and re-marshals. `id`, `jsonrpc`, and
-  `error` are kept as `json.RawMessage` so protocol metadata round-trips
+  `error`are kept as`json.RawMessage` so protocol metadata round-trips
   byte-exact.
+
 - **SSE skipped in v0.1.** Buffering a `text/event-stream` body to scan
+
   it would break the streaming contract; per-event inspection lands in
   P4.5 / v0.2. The HTTP `ModifyResponse` short-circuits on
   `Content-Type: text/event-stream`.
+
 - **Opt-in per bundle.** `response_filters: nil` is the fast path —
+
   transports skip the response-buffering entirely via
   `engine.HasResponseFilters()`. Bundles that only do request-side
   enforcement pay zero response overhead.
@@ -499,7 +556,7 @@ First run of the response-inspection tests failed with "expected
 modification, got none." Root cause: I had embedded raw `\x1b` bytes in
 test JSON fixtures using backtick raw strings. RFC 8259 requires control
 characters (U+0000–U+001F) to be escaped in JSON strings; Go's
-`json.Unmarshal` rejects unescaped ESC, so `EvaluateResponse` fell
+`json.Unmarshal`rejects unescaped ESC, so`EvaluateResponse` fell
 through to its "non-JSON, pass through" branch. Fixed by writing ``
 in the JSON — which is also what real MCP servers send on the wire.
 Lesson: when authoring JSON-RPC test fixtures, paste the on-the-wire
@@ -513,16 +570,21 @@ stderr pipes, and runs the policy engine between the host and child in
 both directions. Three correctness decisions worth recording:
 
 - **Plain pipes, not a PTY.** MCP stdio is line-delimited JSON-RPC with
+
   no terminal semantics, and a PTY's line-discipline translation would
   silently corrupt binary content in tool arguments. Earlier planning
   notes called this a "PTY wrapper" — the implementation is `exec.Cmd`
   pipes with newline framing.
+
 - **Blocked notifications drop silently.** JSON-RPC notifications have
+
   no `id` and the spec forbids a response, so a blocked notification is
   audited but produces no synthetic error. Blocked requests (with `id`)
   still get a `-32000` JSON-RPC error response with the original id
   preserved.
+
 - **Audit log requires a `--path` flag.** Defaulting to stderr would
+
   collide with the child server's stderr (which we transparently forward
   to the host), corrupting the audit stream. Operator-aware path is the
   safe default.
@@ -530,11 +592,11 @@ both directions. Three correctness decisions worth recording:
 ## 2026-05-26 — Audit bus send-on-closed-channel race fixed #incident
 
 The new stdio tests caught a real bug in `internal/audit`: `Bus.Stop`
-called `close(b.ch)` while `Bus.Record` was still selecting on
+called `close(b.ch)`while`Bus.Record` was still selecting on
 `b.ch <- e`. The race detector flagged it; in production this would
 panic intermittently when a transport's `Stop` raced with an in-flight
-audit. Fixed by switching to a `done` channel — `Stop` closes `done`,
-`Record` selects on `done` first and counts a dropped event if the bus
+audit. Fixed by switching to a `done`channel —`Stop`closes`done`,
+`Record`selects on`done` first and counts a dropped event if the bus
 has stopped, and the channel itself is never closed. Property tested
 under `-race`: 0 panics across the full suite. Lesson: never close a
 channel that has multiple senders without a happens-before guarantee on
@@ -548,7 +610,7 @@ to stable for stdlib CVE fixes, (2) discovered golangci-lint 2.12.2 was
 built with Go 1.25 and can't parse 1.26's stdlib export data — pinned CI
 to 1.25 (still in N-1 patch support), (3) bumped golangci-lint-action v6
 → v7 (v6 doesn't support golangci-lint v2 — CI told me directly), (4)
-migrated `.golangci.yml` to v2 schema (formatters split out, `version: "2"`
+migrated `.golangci.yml`to v2 schema (formatters split out,`version: "2"`
 discriminator), fixed gofmt struct-tag alignment, tightened audit-log
 file mode to 0o600 (gosec G302), and added doc comments on every
 exported identifier in `internal/audit`, `internal/jsonrpc`,
@@ -560,24 +622,24 @@ unless you've verified support for current. Final green run: 26460291188.
 
 First push of the scaffold tripped govulncheck because CI pinned Go 1.22,
 which has unpatched CVEs in `crypto/tls`, `crypto/x509`, `net`, and
-`net/http` reachable from `http.Server.ListenAndServe` and
+`net/http`reachable from`http.Server.ListenAndServe` and
 `httputil.ReverseProxy.ServeHTTP`. Local Go 1.26.3 doesn't have those.
-Decision: keep `go.mod` at `go 1.22` as the floor for downstream users,
-but switch CI's `setup-go` to `go-version: stable` so the vulnerability
+Decision: keep `go.mod`at`go 1.22` as the floor for downstream users,
+but switch CI's `setup-go`to`go-version: stable` so the vulnerability
 scan reflects what a fresh install gets. golangci-lint also flagged four
-nits in `internal/transport/http/proxy_test.go` (two unused `r
-*http.Request` params, two unchecked `w.Write` returns) — fixed in the
+nits in `internal/transport/http/proxy_test.go`(two unused`r
+*http.Request`params, two unchecked`w.Write` returns) — fixed in the
 same commit `f5c0ff4`.
 
 ## 2026-05-26 — First green build + baseline bench numbers #milestone
 
-`go test ./...` and `go test -race ./...` pass on first run after install
-(Go 1.26.3 from Homebrew). Build produces both `halberd` and `halberd-http`
+`go test ./...`and`go test -race ./...` pass on first run after install
+(Go 1.26.3 from Homebrew). Build produces both `halberd`and`halberd-http`
 binaries cleanly. Initial bench on Apple M1: blocked DROP TABLE evaluates
 in **2.6 µs/op at 31 allocs/op**, an allowed SELECT in **4.0 µs/op at 25
 allocs/op**. Both an order of magnitude under the 200 µs / 50-alloc
 ceilings declared in CONTRIBUTING. The 25–31 allocs/op number is mostly
-`json.Unmarshal` of the JSON-RPC params (decoded twice — once in `peek` for
+`json.Unmarshal`of the JSON-RPC params (decoded twice — once in`peek` for
 the audit-log tool name, once in `evaluateToolCall`). Single-pass decode is
 the obvious future optimization but not load-bearing for v0.1.
 
@@ -602,24 +664,24 @@ the first pass; P3 (stdio transport), P4 (response inspection), and P5
 
 ## 2026-05-26 — Policy DSL: hand-rolled, not JSON Schema #decision
 
-Considered pulling in `xeipuuv/gojsonschema` to validate `tools/call`
+Considered pulling in `xeipuuv/gojsonschema`to validate`tools/call`
 arguments against full JSON Schema. Rejected for v0.1: the policy DSL is
 intentionally narrow (`type`, `max_length`, `deny_patterns`, `allow_values`)
 and a hand-rolled validator keeps the dependency surface to one library
-(`yaml.v3`). Reconsider in v0.2 if rule packs need `oneOf` / `anyOf` /
+(`yaml.v3`). Reconsider in v0.2 if rule packs need `oneOf`/`anyOf` /
 recursive shapes.
 
 ## 2026-05-26 — JSON-RPC error code -32000 for policy violations #decision
 
 Picked the `-32000` server-defined error code for policy violations. The
-JSON-RPC 2.0 spec reserves `-32000` through `-32099` for "implementation-
+JSON-RPC 2.0 spec reserves `-32000`through`-32099` for "implementation-
 defined server errors." Halberd surfaces violations through this code so the
 agent's MCP client treats them as recoverable upstream errors and (in
 practice) reasons about why the tool failed rather than crashing the session.
 
 ## 2026-05-26 — Go toolchain not installed locally #incident
 
-`go` not on PATH at scaffold time. Wrote `go.mod` by hand against Go 1.22.
+`go`not on PATH at scaffold time. Wrote`go.mod` by hand against Go 1.22.
 Next step: `brew install go && cd Halberd && go mod tidy && go test ./...`
 to verify the codebase compiles. CI will compile against a fresh toolchain
 either way.

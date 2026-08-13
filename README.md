@@ -16,9 +16,9 @@ parsed, evaluated against a YAML policy bundle, and either forwarded or
 blocked with a synthetic JSON-RPC error — before the malicious payload
 reaches the host system.
 
-> **Try it in the browser:** [halberd-keep.vercel.app](https://halberd-keep.vercel.app) — the real `internal/policy` engine compiled to WebAssembly. Pick a rule pack, paste a `tools/call`, see the decision.
+> **Try it in the browser:** [halberd-keep.vercel.app](https://halberd-keep.vercel.app) — the real `internal/policy`engine compiled to WebAssembly. Pick a rule pack, paste a`tools/call`, see the decision.
 
-<a href="https://halberd-keep.vercel.app">
+<a href="<https://halberd-keep.vercel.app>">
   <img src="assets/playground-hero.png" alt="Halberd's playground showing a DROP TABLE request blocked with a red wax-seal verdict and the violation detail" width="100%">
 </a>
 
@@ -73,12 +73,12 @@ Halberd defends that boundary against five concrete threats:
 | # | Threat | How it shows up |
 | --- | --- | --- |
 | T1 | Tool poisoning | A compromised MCP server returns a response containing role-tag spoofing or ANSI escapes that hijack the agent's next turn |
-| T2 | Argument injection | The agent is tricked into calling a legitimate tool with hostile args (`execute_sql` with `DROP TABLE`, `git_clone` with `--upload-pack`) |
+| T2 | Argument injection | The agent is tricked into calling a legitimate tool with hostile args (`execute_sql`with`DROP TABLE`, `git_clone`with`--upload-pack`) |
 | T3 | Out-of-scope I/O | A tool reads `/etc/shadow`, hits a private IP, or writes outside its sandbox |
 | T4 | Capability creep | A server pushes `tools/list_changed` mid-session; a new, unvetted tool appears and gets called |
 | T5 | Exfiltration via response | A tool response carries SSH keys, env vars, or other secrets back into the model context |
 
-v0.1 covers **T1**, **T2**, **T4**, and **T5** over both **HTTP** and
+v0.1 covers **T1**, **T2**, **T4**, and **T5**over both**HTTP** and
 **stdio** transports. T3 (out-of-scope I/O) is the v0.2 roadmap.
 
 ## How it works
@@ -125,11 +125,12 @@ brew install go
 git clone https://github.com/Builder106/halberd && cd Halberd
 go build -o bin/ ./cmd/...
 
-# Validate a policy bundle:
+# Validate a policy bundle
+
 ./bin/halberd lint policies/mcp-server-postgres.yaml
 ```
 
-### Bundled rule packs
+## Bundled rule packs
 
 | Pack | Threats covered | Note |
 | --- | --- | --- |
@@ -155,7 +156,7 @@ bin/halberd-stdio \
   -- bin/halberd-honeypot
 ```
 
-Pipe in a `tools/call` for `execute_sql` with `DROP TABLE`, or `read_file`
+Pipe in a `tools/call`for`execute_sql`with`DROP TABLE`, or `read_file`
 with `../../etc/passwd`, or `list_users` (the response carries fake
 AWS / GitHub / RSA secrets) — and watch Halberd block, redact, and audit
 each one. See [`cmd/halberd-honeypot/README.md`](cmd/halberd-honeypot/README.md)
@@ -181,7 +182,7 @@ for the full threat-coverage table.
 ```
 
 Point your MCP client at `http://localhost:9090` instead of the postgres
-server. Every `tools/call` is logged. Try a `DROP TABLE` — Halberd
+server. Every `tools/call`is logged. Try a`DROP TABLE` — Halberd
 returns a JSON-RPC error before the request reaches postgres.
 
 ### Option B — local stdio server (Claude Desktop, Cursor, Windsurf)
@@ -218,14 +219,18 @@ upstream server never sees the blocked payload.
 version: 1
 server: mcp-server-postgres
 tools:
+
   - name: query
+
     arguments:
       sql:
         type: string
         max_length: 8192
         deny_patterns:
+
           - '(?i)\bdrop\s+(table|database|schema)\b'
           - ';\s*--'                                  # statement chaining
+
 defaults:
   unknown_tool: deny           # T4: block tools not in this bundle
   unknown_method: log_and_pass
@@ -272,11 +277,16 @@ Reproduce locally with `go test -bench=. -benchmem ./internal/policy`.
 ## Related work
 
 - **[`mcp-scan`](https://github.com/invariantlabs-ai/mcp-scan)** — static
+
   analysis of MCP server source. Complementary to Halberd (static vs.
   runtime).
+
 - **Cloudflare AI Gateway / Portkey** — LLM-side proxies, inspect prompts and
+
   completions, not tool-call envelopes. Different layer.
+
 - **Microsoft RAMPART** — fuzzing harness for agentic security testing.
+
   Test-time, not prod-time.
 
 ## Contributing

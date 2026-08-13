@@ -37,17 +37,17 @@ honeypot never sees the query. The block is in `halberd.jsonl`.
 
 | Tool | Threat | What the tool does |
 | --- | --- | --- |
-| `get_weather(city)` | **T1** (tool poisoning) | Returns a response containing ANSI color escapes, a zero-width space splitting `<\|im_start\|>`, and a role-tag-spoofed system prompt. Halberd's response inspector should strip the ANSI and zero-width chars before the agent sees the text. |
-| `execute_sql(query)` | **T2** (argument injection) | Echoes any query back as a success result. The point is to verify request-side `deny_patterns` block dangerous SQL *before* it reaches this function — by the time execution lands here, it's already too late. |
+| `get_weather(city)` | **T1** (tool poisoning) | Returns a response containing ANSI color escapes, a zero-width space splitting`<\|im_start\|>`, and a role-tag-spoofed system prompt. Halberd's response inspector should strip the ANSI and zero-width chars before the agent sees the text. |
+| `execute_sql(query)` | **T2** (argument injection) | Echoes any query back as a success result. The point is to verify request-side`deny_patterns` block dangerous SQL *before* it reaches this function — by the time execution lands here, it's already too late. |
 | `read_file(path)` | **T2 + T3** (argument injection + out-of-scope I/O) | Opens whatever path the agent supplies. No allowlist, no path-traversal guard, no symlink resolution. Halberd's filesystem rule pack must block traversal and absolute-path attempts upstream. |
-| `list_users()` | **T5** (exfiltration via response) | Returns a response embedding `AKIAIOSFODNN7EXAMPLE`, `ghp_AAAA…`, and a `-----BEGIN RSA PRIVATE KEY-----` block. All values are AWS-documented or format-only fakes — nothing live. |
+| `list_users()` | **T5** (exfiltration via response) | Returns a response embedding`AKIAIOSFODNN7EXAMPLE`, `ghp_AAAA…`, and a `-----BEGIN RSA PRIVATE KEY-----` block. All values are AWS-documented or format-only fakes — nothing live. |
 
 **T4** (capability creep via `tools/list_changed`) is not yet
 implemented; the honeypot's tool list is static. v0.2 will add a
 trigger tool that pushes a `tools/list_changed` notification to
 demonstrate request-side mid-session inventory drift.
 
-## Why a separate binary?
+## Why a separate binary
 
 Halberd is transport-agnostic; the policy engine doesn't care whether
 the upstream is a real MCP server or a teaching prop. But every
@@ -60,11 +60,16 @@ verifies both directions of the proxy in one shot.
 ## Safety properties
 
 - Never advertises tools that do anything beyond returning canned text
+
   or opening a file. No shell exec, no network egress, no DB.
+
 - `read_file` is the only tool that touches the filesystem; it surfaces
+
   the OS error verbatim (file-not-found is a normal response, not a
   silent failure).
+
 - The fake secrets are documented public examples. `AKIAIOSFODNN7EXAMPLE`
-  is from AWS's own IAM documentation; `ghp_` followed by 36 `A`s
+
+  is from AWS's own IAM documentation; `ghp_`followed by 36`A`s
   matches GitHub's PAT format but is not a real token; the RSA block is
   a fragment, not a valid key.

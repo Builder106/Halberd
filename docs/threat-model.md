@@ -24,7 +24,7 @@ tool with hostile arguments. `execute_sql("DROP TABLE users")`,
 `git_clone("--upload-pack=ssh user@host")`, `shell_exec("rm -rf /")`.
 
 **Halberd's job.** Match each argument against a per-tool rule:
-`deny_patterns` (regex denylist), `allow_values` (strict enum),
+`deny_patterns`(regex denylist),`allow_values` (strict enum),
 `max_length`, `type`. Block on any match.
 
 ## T3 — Out-of-scope I/O *(planned, P5)*
@@ -68,11 +68,16 @@ opt in per-bundle via `response_filters.global.secret_scanners`.
 Halberd does **not** defend against:
 
 - Compromise of the agent process itself (memory-resident prompt injection,
+
   malicious system prompts). That's an LLM-layer concern.
+
 - Compromise of the user's session credentials. That's the IdP's job.
 - Side-channel timing attacks on the proxy itself. Latency variance from
+
   policy evaluation is bounded by the perf gates in CI; if you need
   constant-time policy lookup, file an issue.
+
 - Denial of service from the upstream MCP server. Halberd assumes the
+
   upstream is honest-but-curious; for byzantine upstreams, run Halberd in
   front of a rate limiter and an upstream-health probe.

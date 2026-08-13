@@ -24,21 +24,23 @@ response_filters:               # optional; absent = no response inspection
 
 | Key | Required | Notes |
 | --- | --- | --- |
-| `version` | yes | Must be `1`. Future-incompatible changes bump this. |
+| `version` | yes | Must be`1`. Future-incompatible changes bump this. |
 | `server` | yes | Free-form identifier; appears in audit-log entries. |
-| `tools` | yes | List of tool rules. Empty list is valid but then every `tools/call` is rejected when `defaults.unknown_tool = deny`. |
-| `defaults.unknown_tool` | no | Default: `deny`. |
-| `defaults.unknown_method` | no | Default: `log_and_pass`. |
+| `tools` | yes | List of tool rules. Empty list is valid but then every`tools/call`is rejected when`defaults.unknown_tool = deny`. |
+| `defaults.unknown_tool` | no | Default:`deny`. |
+| `defaults.unknown_method` | no | Default:`log_and_pass`. |
 
 ## Tool rule
 
 ```yaml
+
 - name: <string>
+
   arguments:
     <arg-name>: <argument-rule>
 ```
 
-Tools whose `name` is referenced by a `tools/call` request are matched
+Tools whose `name`is referenced by a`tools/call` request are matched
 case-sensitively. A tool listed here with no `arguments` map is allowed
 unconditionally — useful for read-only metadata calls like `list_tables`.
 
@@ -80,13 +82,13 @@ fields round-trip verbatim — Halberd does not touch protocol metadata.
 | --- | --- |
 | `strip_ansi_escapes` | Removes CSI (`\x1b[...]`) and OSC (`\x1b]...\x07`) escape sequences. Tool output has no legitimate reason to contain terminal-control codes; their presence is a strong tool-poisoning signal. |
 | `strip_zero_width` | Removes U+200B/U+200C/U+200D/U+2060/U+FEFF. These are invisible but can carry steganographic payloads or split injection markers across log scrapers. |
-| `secret_scanners` | List of built-in detectors that replace matches with `[REDACTED]`. |
+| `secret_scanners` | List of built-in detectors that replace matches with`[REDACTED]`. |
 
 Built-in scanner names:
 
-- `aws_access_key` — `AKIA…` (standard) and `ASIA…` (STS) keys
-- `github_token` — `ghp_…` / `ghs_…` / `gho_…` / `ghr_…` / `ghu_…`, 36+ chars
-- `rsa_private_key` — `-----BEGIN [RSA|OPENSSH|EC|DSA] PRIVATE KEY-----` blocks, redacted from BEGIN to END
+- `aws_access_key`—`AKIA…`(standard) and`ASIA…` (STS) keys
+- `github_token`—`ghp_…`/`ghs_…`/`gho_…`/`ghr_…`/`ghu_…`, 36+ chars
+- `rsa_private_key`—`-----BEGIN [RSA|OPENSSH|EC|DSA] PRIVATE KEY-----` blocks, redacted from BEGIN to END
 
 A bundle with no `response_filters` block does no response-side work
 whatsoever — every response forwards verbatim. The check happens once at
@@ -95,11 +97,16 @@ proxy startup, not per-request.
 ### What response inspection does *not* cover in v0.1
 
 - **SSE streams.** When the upstream sends `Content-Type:
+
   text/event-stream`, Halberd forwards events unchanged. Per-event
   inspection is on the v0.2 roadmap.
+
 - **The `error` field.** Server-defined error messages are not
+
   sanitized — operators inspect them directly in audit logs.
+
 - **Per-tool response policy.** Only `response_filters.global` exists in
+
   v0.1. Per-tool constraints (`max_rows`, response-shape validation) land
   in v0.2.
 

@@ -52,4 +52,4 @@ sequenceDiagram
 
 ## WebAssembly Bridge (`cmd/halberd-wasm`)
 
-The core Go policy engine in `internal/policy` is compiled to WebAssembly via Go's `js/wasm` architecture target. The browser playground imports `halberd.wasm` directly, executing zero-latency policy decisions inside client JavaScript without hitting a backend API server.
+The core Go policy engine in `internal/policy`is compiled to WebAssembly via Go's`js/wasm`architecture target. The browser playground imports`halberd.wasm` directly, executing zero-latency policy decisions inside client JavaScript without hitting a backend API server.
