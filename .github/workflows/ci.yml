@@ -159,7 +159,7 @@ jobs:
 
       - name: next lint
         working-directory: web
-        run: npx next lint
+        run: npm run lint
 
       - name: install Playwright browsers
         working-directory: web
