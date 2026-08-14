@@ -1,7 +1,7 @@
 <picture>
   <source media="(prefers-color-scheme: dark)"  srcset="assets/banner-dark.svg">
   <source media="(prefers-color-scheme: light)" srcset="assets/banner-light.svg">
-  <img alt="Halberd — a JSON-RPC firewall for MCP agents" src="assets/banner-dark.svg">
+  <img alt="Halberd: A security guard for AI assistants" src="assets/banner-dark.svg">
 </picture>
 
 [![CI](https://github.com/Builder106/halberd/actions/workflows/ci.yml/badge.svg)](https://github.com/Builder106/halberd/actions/workflows/ci.yml)
@@ -10,13 +10,15 @@
 [![MCP](https://img.shields.io/badge/MCP-2025--06-7C4DFF.svg)](https://modelcontextprotocol.io)
 [![Demo](https://img.shields.io/badge/demo-live-success.svg)](https://halberd-keep.vercel.app)
 
-**Halberd** is a high-throughput reverse proxy that sits between an LLM agent
-and its Model Context Protocol (MCP) servers. Every `tools/call` envelope is
-parsed, evaluated against a YAML policy bundle, and either forwarded or
-blocked with a synthetic JSON-RPC error — before the malicious payload
-reaches the host system.
+> **A security guard for AI assistants.** Halberd checks every tool an AI tries to use, preventing data leaks and blocking unauthorized commands before they execute.
 
-> **Try it in the browser:** [halberd-keep.vercel.app](https://halberd-keep.vercel.app) — the real `internal/policy`engine compiled to WebAssembly. Pick a rule pack, paste a`tools/call`, see the decision.
+## 💡 What is Halberd?
+
+When you give an AI assistant access to your computer, files, or database, you want to be sure it only does what you asked. Halberd acts like an airport security checkpoint between the AI model and your local machine. It inspects every tool request in real time and blocks dangerous or unapproved actions before they reach your system.
+
+**Halberd** operates as a high-throughput reverse proxy between an LLM agent and its Model Context Protocol (MCP) servers. Every `tools/call` envelope is parsed, evaluated against a YAML policy bundle, and either forwarded or blocked with a synthetic JSON-RPC error before any malicious payload reaches the host system.
+
+> **Try it in the browser:** [halberd-keep.vercel.app](https://halberd-keep.vercel.app) (the real `internal/policy` engine compiled to WebAssembly). Pick a rule pack, paste a `tools/call`, and see the decision live.
 
 <a href="<https://halberd-keep.vercel.app>">
   <img src="assets/playground-hero.png" alt="Halberd's playground showing a DROP TABLE request blocked with a red wax-seal verdict and the violation detail" width="100%">

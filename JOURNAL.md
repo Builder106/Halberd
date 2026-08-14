@@ -4,6 +4,10 @@
 > things happen — retrospectives need this raw material to land.
 > Reverse-chronological; one paragraph max per entry.
 
+## 2026-08-14: Accessible plain-English documentation update #decision
+
+Refactored the README introductory hook and project tagline to make the firewall's value proposition immediately intuitive to non-technical readers. Added an airport security checkpoint analogy to explain the MCP proxy barrier in plain language before diving into the wire-level JSON-RPC architecture and WebAssembly playground.
+
 ## 2026-08-07 — Firewall architecture specification and feature audit #milestone
 
 Executed a feature audit across the Go reverse proxy (`cmd/halberd-http`, `cmd/halberd-stdio`), policy engine (`internal/policy`), and WebAssembly bridge (`cmd/halberd-wasm`). Created `docs/FIREWALL_ARCHITECTURE.md` documenting threat mitigations T1 through T5, wax-seal verdict semantics (Refused, Pass Granted, Amended), and the client-side WASM engine architecture. Scheduled T3 out-of-scope I/O network guard enhancements and interactive browser ruleset builder UI for development.
