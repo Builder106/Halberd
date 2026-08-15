@@ -37,7 +37,7 @@ jobs:
           # with 1.25 and cannot parse 1.26's stdlib export data. The Go team
           # backports security fixes to N-1, so 1.25 still receives CVE
           # patches. Bump when golangci-lint adds 1.26 support (issue #6272).
-          go-version: 1.25.12
+          go-version: '1.25.x'
           cache: true
 
       # go mod tidy's output can differ by OS line-ending, so this
@@ -73,7 +73,7 @@ jobs:
           # with 1.25 and cannot parse 1.26's stdlib export data. The Go team
           # backports security fixes to N-1, so 1.25 still receives CVE
           # patches. Bump when golangci-lint adds 1.26 support (issue #6272).
-          go-version: 1.25.12
+          go-version: '1.25.x'
           cache: true
 
       - name: run benchmarks
@@ -96,7 +96,7 @@ jobs:
           # with 1.25 and cannot parse 1.26's stdlib export data. The Go team
           # backports security fixes to N-1, so 1.25 still receives CVE
           # patches. Bump when golangci-lint adds 1.26 support (issue #6272).
-          go-version: 1.25.12
+          go-version: '1.25.x'
           cache: true
 
       - name: install govulncheck
@@ -116,7 +116,7 @@ jobs:
           # with 1.25 and cannot parse 1.26's stdlib export data. The Go team
           # backports security fixes to N-1, so 1.25 still receives CVE
           # patches. Bump when golangci-lint adds 1.26 support (issue #6272).
-          go-version: 1.25.12
+          go-version: '1.25.x'
           cache: true
 
       - uses: golangci/golangci-lint-action@v9
@@ -130,7 +130,7 @@ jobs:
 
       - uses: actions/setup-go@v7
         with:
-          go-version: 1.25.12
+          go-version: '1.25.x'
           cache: true
 
       - uses: actions/setup-node@v7
