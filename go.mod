@@ -1,5 +1,5 @@
 module github.com/Builder106/halberd
 
-go 1.25.12
+go 1.25.0
 
 require gopkg.in/yaml.v3 v3.0.1
