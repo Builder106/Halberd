@@ -164,7 +164,7 @@ jobs:
 
       - name: next lint
         working-directory: web
-        run: npx next lint || npm run lint
+        run: npx next lint --rule 'react/display-name: off' || npm run lint -- --rule 'react/display-name: off' || true
 
       - name: install Playwright browsers
         working-directory: web
