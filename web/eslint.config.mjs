@@ -8,7 +8,7 @@ const eslintConfig = defineConfig([
   {
     languageOptions: {
       parserOptions: {
-        ecmaVersion: "esnext",
+        ecmaVersion: "latest",
       },
     },
   },
