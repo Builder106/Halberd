@@ -14,17 +14,9 @@
       <stop offset="0%"  stop-color="#ffffff" stop-opacity="0.9"/>
       <stop offset="100%" stop-color="#ffffff" stop-opacity="0.2"/>
     </linearGradient>
-    <linearGradient id="accent" x1="0" y1="0" x2="1" y2="0">
-      <stop offset="0%" stop-color="#7c4dff"/>
-      <stop offset="100%" stop-color="#00d4ff"/>
-    </linearGradient>
-    <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
-      <path d="M 40 0 L 0 0 0 40" fill="none" stroke="#1c2530" stroke-width="1"/>
-    </pattern>
   </defs>
 
   <rect width="1200" height="420" fill="url(#bg)"/>
-  <rect width="1200" height="420" fill="url(#grid)" opacity="0.6"/>
 
   <!-- Halberd mark, centered around x=220 -->
   <g transform="translate(220 210)">
@@ -69,27 +61,9 @@
           letter-spacing="-2"
           fill="#f0f4f8">HALBERD</text>
 
-    <rect x="2" y="-12" width="120" height="3" fill="url(#accent)"/>
-
-    <text x="0" y="40"
-          font-family="-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Inter', system-ui, sans-serif"
-          font-size="26"
-          font-weight="500"
-          fill="#9aabbe">A JSON-RPC firewall for MCP agents.</text>
-
     <text x="0" y="96"
           font-family="ui-monospace, 'SF Mono', 'JetBrains Mono', Menlo, monospace"
           font-size="18"
           fill="#5e6e80">tools/call → policy → audit → upstream</text>
-  </g>
-
-  <!-- Subtle status pill: green dot + 'blocked' tag -->
-  <g transform="translate(1080 60)">
-    <rect x="-90" y="-18" width="100" height="32" rx="16" fill="#1c2530" stroke="#2a3543" stroke-width="1"/>
-    <circle cx="-72" cy="-2" r="5" fill="#00d4ff"/>
-    <text x="-58" y="3"
-          font-family="ui-monospace, 'SF Mono', Menlo, monospace"
-          font-size="13"
-          fill="#9aabbe">v0.1</text>
   </g>
 </svg>
