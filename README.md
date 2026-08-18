@@ -37,7 +37,7 @@ A `DROP TABLE` under the postgres bundle, refused with a red wax seal:
 <sub>Recorded against the live site by the <a href="web/e2e/demo/">Gherkin demo suite</a>. Re-record locally with <code>cd web && npm run demo</code>. Higher-quality H.264 mp4 alongside each clip: <a href="assets/demo/refused-drop-table.mp4">refused-drop-table.mp4</a>.</sub>
 
 <details>
-<summary><strong>⚔ Refused</strong> — another scenario from the same cluster: path-traversal blocked under the filesystem bundle</summary>
+<summary><strong>⚔ Refused:</strong> path traversal attempt blocked under filesystem rules</summary>
 
 ![Halberd refusing a ../../etc/shadow read under the mcp-server-filesystem bundle: red wax seal with the path-traversal deny_pattern detail](assets/demo/refused-path-traversal.gif)
 
@@ -46,7 +46,7 @@ A `DROP TABLE` under the postgres bundle, refused with a red wax seal:
 </details>
 
 <details>
-<summary><strong>✎ Amended</strong> — the auditor strikes AWS / GitHub / RSA secrets from a response (T1 + T5)</summary>
+<summary><strong>✎ Amended:</strong> sensitive credentials stripped from tool responses</summary>
 
 ![Halberd amending a response containing fake AWS, GitHub, and RSA secrets under the honeypot bundle: blue ink seal with three struck detections, rewritten payload shows [REDACTED]](assets/demo/amended-aws-github-rsa-laden-response.gif)
 
@@ -55,7 +55,7 @@ A `DROP TABLE` under the postgres bundle, refused with a red wax seal:
 </details>
 
 <details>
-<summary><strong>⛨ Pass granted</strong> — a safe SELECT reaches the upstream unchanged (Halberd is a firewall, not a wall)</summary>
+<summary><strong>⛨ Pass granted:</strong> safe database queries reach destination untouched</summary>
 
 ![Halberd granting a SELECT id, name FROM students LIMIT 10 under the mcp-server-postgres bundle: brass seal, forwarded to upstream unchanged](assets/demo/granted-safe-select.gif)
 
@@ -63,22 +63,19 @@ A `DROP TABLE` under the postgres bundle, refused with a red wax seal:
 
 </details>
 
-> *`mcp-scan` checks what tools **say** they do. Halberd checks what they
-> **actually try** in production.*
+> *Standard scanners check what tools **claim** they do. Halberd inspects what they **actually attempt** in production.*
 
 ## Why this exists
 
-By mid-2026, the dominant attack surface in agentic AI is no longer the model
-itself — it's the boundary between the model and the tools it can call.
-Halberd defends that boundary against five concrete threats:
+The primary security vulnerability in AI systems is often not the AI model itself, but the tools and computer permissions granted to it. Halberd defends against five major risks:
 
-| # | Threat | How it shows up |
+| # | Threat | What happens |
 | --- | --- | --- |
-| T1 | Tool poisoning | A compromised MCP server returns a response containing role-tag spoofing or ANSI escapes that hijack the agent's next turn |
-| T2 | Argument injection | The agent is tricked into calling a legitimate tool with hostile args (`execute_sql`with`DROP TABLE`, `git_clone`with`--upload-pack`) |
-| T3 | Out-of-scope I/O | A tool reads `/etc/shadow`, hits a private IP, or writes outside its sandbox |
-| T4 | Capability creep | A server pushes `tools/list_changed` mid-session; a new, unvetted tool appears and gets called |
-| T5 | Exfiltration via response | A tool response carries SSH keys, env vars, or other secrets back into the model context |
+| T1 | Tool poisoning | A compromised tool server returns hidden commands designed to hijack the AI's next action |
+| T2 | Argument injection | An attacker tricks the AI into running destructive commands (such as deleting database tables or running dangerous shell scripts) |
+| T3 | Unauthorized file access | A tool attempts to read private system files or access restricted networks |
+| T4 | Permission creep | A connected server silently introduces new, unvetted tools in the middle of an active session |
+| T5 | Secret exfiltration | A tool response accidentally leaks API keys, passwords, or encryption keys back to the AI model |
 
 v0.1 covers **T1**, **T2**, **T4**, and **T5**over both**HTTP** and
 **stdio** transports. T3 (out-of-scope I/O) is the v0.2 roadmap.
