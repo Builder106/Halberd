@@ -162,9 +162,9 @@ jobs:
         working-directory: web
         run: npx next build
 
-      - name: next lint
+      - name: ESLint
         working-directory: web
-        run: npx next lint
+        run: npx eslint . --max-warnings 0
 
       - name: install Playwright browsers
         working-directory: web

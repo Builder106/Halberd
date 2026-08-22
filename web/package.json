@@ -6,7 +6,7 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint",
+    "lint": "eslint --max-warnings 0",
     "demo": "bddgen --config playwright.demo.config.ts && playwright test --config playwright.demo.config.ts",
     "test:qa": "playwright test --config playwright.qa.config.ts",
     "test:qa:bdd": "bddgen --config playwright.qa-bdd.config.ts && playwright test --config playwright.qa-bdd.config.ts",
