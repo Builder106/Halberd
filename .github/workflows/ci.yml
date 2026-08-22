@@ -164,8 +164,7 @@ jobs:
 
       - name: next lint
         working-directory: web
-        run: |
-          npx next lint || true
+        run: npx next lint --max-warnings 0
 
       - name: install Playwright browsers
         working-directory: web
