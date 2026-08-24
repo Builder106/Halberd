@@ -52,8 +52,12 @@ jobs:
       - name: go vet
         run: go vet ./...
 
-      - name: go test (race)
-        run: go test -race -count=1 ./...
+      - name: go test (race & coverage)
+        run: |
+          go test -v -race -coverprofile=coverage.out -covermode=atomic ./...
+          go tool cover -func=coverage.out
+          total=$(go tool cover -func=coverage.out | awk '/^total:/ {print $3}')
+          test "$total" = "100.0%" || { echo "::error::Go source coverage is $total, expected 100.0%"; exit 1; }
 
       - name: lint policy bundles
         shell: bash
@@ -165,6 +169,10 @@ jobs:
       - name: ESLint
         working-directory: web
         run: npx eslint . --max-warnings 0
+
+      - name: Vitest unit tests (coverage)
+        working-directory: web
+        run: npm run test:unit -- --coverage
 
       - name: install Playwright browsers
         working-directory: web
