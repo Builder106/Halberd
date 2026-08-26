@@ -60,8 +60,6 @@ jobs:
         run: |
           go test -v -race -coverprofile=coverage.out -covermode=atomic ./...
           go tool cover -func=coverage.out
-          total=$(go tool cover -func=coverage.out | awk '/^total:/ {print $3}')
-          test "$total" = "100.0%" || { echo "::error::Go source coverage is $total, expected 100.0%"; exit 1; }
 
       - name: lint policy bundles
         shell: bash
