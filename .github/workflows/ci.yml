@@ -57,6 +57,7 @@ jobs:
         run: go vet ./...
 
       - name: go test (race & coverage)
+        shell: bash
         run: |
           go test -v -race -coverprofile=coverage.out -covermode=atomic ./...
           go tool cover -func=coverage.out
@@ -132,6 +133,7 @@ jobs:
       - uses: golangci/golangci-lint-action@v6
         with:
           version: v1.64.6
+          install-mode: goinstall
 
   web:
     needs: [test, golangci-lint]
