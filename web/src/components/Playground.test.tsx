@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
+import { describe, it, expect, vi, beforeEach } from "vitest";
 import React from "react";
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import { Playground } from "./Playground";
@@ -57,8 +57,8 @@ describe("Playground interactive component", () => {
       version: "0.1.0-wasm",
     };
 
-    vi.spyOn(halberdLib, "loadHalberd").mockResolvedValue(mockHalberdGlobal as any);
-    (globalThis as any).halberd = mockHalberdGlobal;
+    vi.spyOn(halberdLib, "loadHalberd").mockResolvedValue(mockHalberdGlobal as never);
+    (globalThis as typeof globalThis & { halberd?: typeof mockHalberdGlobal }).halberd = mockHalberdGlobal;
 
     render(React.createElement(Playground));
 

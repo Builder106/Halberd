@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { presets, type Preset } from "./presets";
+import { presets } from "./presets";
 
 describe("presets", () => {
   it("contains required rule packs", () => {
@@ -18,7 +18,7 @@ describe("presets", () => {
   });
 
   it("ensures every preset has valid JSON payload and valid properties", () => {
-    for (const [packName, presetList] of Object.entries(presets)) {
+    for (const [, presetList] of Object.entries(presets)) {
       for (const preset of presetList) {
         expect(preset.id).toBeTruthy();
         expect(preset.label).toBeTruthy();
