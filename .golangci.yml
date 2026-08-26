@@ -1,10 +1,8 @@
-version: "2"
-
 run:
   timeout: 5m
 
 linters:
-  default: none
+  disable-all: true
   enable:
     - errcheck
     - govet
@@ -14,14 +12,10 @@ linters:
     - misspell
     - revive
     - gosec
-  settings:
-    gosec:
-      excludes:
-        - G304  # file inclusion via variable (intentional in policy.LoadBundle)
-        - G204  # subprocess with variable args (the CLI contract of halberd-stdio)
-        - G101  # hardcoded credentials (AWS-documented example values used as scanner-test fixtures)
 
-formatters:
-  enable:
-    - gofmt
-    - goimports
+linters-settings:
+  gosec:
+    excludes:
+      - G304  # file inclusion via variable (intentional in policy.LoadBundle)
+      - G204  # subprocess with variable args (the CLI contract of halberd-stdio)
+      - G101  # hardcoded credentials (AWS-documented example values used as scanner-test fixtures)
