@@ -8,6 +8,10 @@ on:
 permissions:
   contents: read
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   secrets:
     name: Secret scan
@@ -132,6 +136,7 @@ jobs:
           version: v2.12.2
 
   web:
+    needs: [test, golangci-lint]
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v7
