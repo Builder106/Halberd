@@ -105,7 +105,6 @@ describe("loadHalberd", () => {
 
   it("rejects when window is undefined", async () => {
     const originalWindow = globalThis.window;
-    // @ts-expect-error intentionally simulating non-browser environment
     delete (globalThis as { window?: unknown }).window;
     try {
       const { loadHalberd: load } = await import("./halberd");
@@ -117,7 +116,6 @@ describe("loadHalberd", () => {
 
   it("rejects when wasm_exec.js script fails to load", async () => {
     const originalGo = globalThis.Go;
-    // @ts-expect-error cleanup Go
     delete (globalThis as { Go?: unknown }).Go;
 
     vi.spyOn(document.head, "appendChild").mockImplementation((node: Node) => {
@@ -136,7 +134,6 @@ describe("loadHalberd", () => {
 
   it("throws when Go runtime did not initialize after script load", async () => {
     const originalGo = globalThis.Go;
-    // @ts-expect-error cleanup Go
     delete (globalThis as { Go?: unknown }).Go;
 
     vi.spyOn(document.head, "appendChild").mockImplementation((node: Node) => {
@@ -172,9 +169,7 @@ describe("loadHalberd", () => {
       version: "0.1.0",
     };
 
-    // @ts-expect-error clear Go
     delete (globalThis as { Go?: unknown }).Go;
-    // @ts-expect-error clear halberd
     delete (globalThis as { halberd?: unknown }).halberd;
 
     vi.spyOn(document.head, "appendChild").mockImplementation((node: Node) => {
@@ -232,7 +227,6 @@ describe("loadHalberd", () => {
     }
 
     globalThis.Go = MockGo as unknown as typeof Go;
-    // @ts-expect-error clear halberd
     delete (globalThis as { halberd?: unknown }).halberd;
 
     const mockInstance = { exports: {} } as unknown as WebAssembly.Instance;
@@ -267,7 +261,6 @@ describe("loadHalberd", () => {
     }
 
     globalThis.Go = MockGo as unknown as typeof Go;
-    // @ts-expect-error clear halberd
     delete (globalThis as { halberd?: unknown }).halberd;
 
     const mockInstance = { exports: {} } as unknown as WebAssembly.Instance;
