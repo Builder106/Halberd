@@ -155,7 +155,6 @@ describe("Playground interactive component", () => {
 
     // Test evaluate when halberd global is missing
     const savedHalberd = globalThis.halberd;
-    // @ts-expect-error clear halberd
     delete (globalThis as { halberd?: unknown }).halberd;
     fireEvent.click(challengeBtn);
     globalThis.halberd = savedHalberd;
