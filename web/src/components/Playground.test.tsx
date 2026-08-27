@@ -97,20 +97,100 @@ describe("Playground interactive component", () => {
       expect(screen.getByText("aws_access_key")).toBeTruthy();
     });
 
-    // Test switching pack
+    // Test typing in textarea directly
+    const textarea = screen.getByRole("textbox");
+    fireEvent.change(textarea, { target: { value: "invalid json string" } });
+
+    // Test evaluating modified response with non-JSON original payload to test tryPretty catch
+    mockHalberdGlobal.evaluateResponse.mockReturnValueOnce(
+      JSON.stringify({
+        modified: true,
+        payload: '{"result":{"content":[{"type":"text","text":"[REDACTED]"}]}}',
+        detections: [{ kind: "aws_access_key", path: "result.content[0].text" }],
+      }),
+    );
+    fireEvent.click(challengeBtn);
+    await waitFor(() => {
+      expect(screen.getByText("Amended")).toBeTruthy();
+    });
+
+    // Test evaluating an unmodified response
+    mockHalberdGlobal.evaluateResponse.mockReturnValueOnce(
+      JSON.stringify({
+        modified: false,
+        payload: '{"status":"ok"}',
+        detections: null,
+      }),
+    );
+    fireEvent.click(responseTab);
+    fireEvent.click(challengeBtn);
+    await waitFor(() => {
+      expect(screen.getByText("Passed through")).toBeTruthy();
+      expect(screen.getByText(/the response reached the agent unchanged/)).toBeTruthy();
+    });
+
+    // Test switching to a pack without presets to cover setPayload("")
     const select = screen.getByRole("combobox");
     fireEvent.change(select, { target: { value: "mcp-server-filesystem" } });
+    mockPacks.push({ name: "mcp-server-custom-nopresets", server: "stdio", responseFilters: false });
+    fireEvent.change(select, { target: { value: "mcp-server-custom-nopresets" } });
 
-    // Test exception handling in evaluate
+    // Test exception handling with Error instance
     mockHalberdGlobal.evaluateRequest.mockImplementationOnce(() => {
-      throw new Error("Synthetic evaluation error");
+      throw new Error("Synthetic Error object");
     });
-    const requestTab = screen.getByRole("button", { name: /request — inbound/i });
-    fireEvent.click(requestTab);
     fireEvent.click(challengeBtn);
-
     await waitFor(() => {
-      expect(screen.getByText("Synthetic evaluation error")).toBeTruthy();
+      expect(screen.getByText("Synthetic Error object")).toBeTruthy();
     });
+
+    // Test exception handling with non-Error thrown
+    mockHalberdGlobal.evaluateRequest.mockImplementationOnce(() => {
+      throw "Synthetic string error";
+    });
+    fireEvent.click(challengeBtn);
+    await waitFor(() => {
+      expect(screen.getByText("Synthetic string error")).toBeTruthy();
+    });
+
+    // Test evaluate when halberd global is missing
+    const savedHalberd = globalThis.halberd;
+    // @ts-expect-error clear halberd
+    delete (globalThis as { halberd?: unknown }).halberd;
+    fireEvent.click(challengeBtn);
+    globalThis.halberd = savedHalberd;
+  });
+
+  it("ignores resolve when unmounted during load", async () => {
+    let resolvePromise!: (value: unknown) => void;
+    const promise = new Promise((resolve) => {
+      resolvePromise = resolve;
+    });
+    vi.spyOn(halberdLib, "loadHalberd").mockReturnValue(
+      promise as unknown as ReturnType<typeof halberdLib.loadHalberd>,
+    );
+
+    const { unmount } = render(React.createElement(Playground));
+    unmount();
+    resolvePromise({
+      packs: () => "[]",
+      evaluateRequest: vi.fn(),
+      evaluateResponse: vi.fn(),
+      version: "0.1.0",
+    });
+  });
+
+  it("ignores reject when unmounted during load", async () => {
+    let rejectPromise!: (reason: unknown) => void;
+    const promise = new Promise((_, reject) => {
+      rejectPromise = reject;
+    });
+    vi.spyOn(halberdLib, "loadHalberd").mockReturnValue(
+      promise as unknown as ReturnType<typeof halberdLib.loadHalberd>,
+    );
+
+    const { unmount } = render(React.createElement(Playground));
+    unmount();
+    rejectPromise(new Error("Unmounted error"));
   });
 });
