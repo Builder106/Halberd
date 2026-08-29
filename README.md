@@ -20,7 +20,7 @@ When you give an AI assistant access to your computer, files, or database, you w
 
 > **Try it in the browser:** [halberd-keep.vercel.app](https://halberd-keep.vercel.app) (the real `internal/policy` engine compiled to WebAssembly). Pick a rule pack, paste a `tools/call`, and see the decision live.
 
-<a href="<https://halberd-keep.vercel.app>">
+<a href="https://halberd-keep.vercel.app">
   <img src="assets/playground-hero.png" alt="Halberd's playground showing a DROP TABLE request blocked with a red wax-seal verdict and the violation detail" width="100%">
 </a>
 
@@ -121,7 +121,7 @@ curl -L https://github.com/Builder106/halberd/releases/latest/download/halberd_$
 
 ```bash
 brew install go
-git clone https://github.com/Builder106/halberd && cd Halberd
+git clone https://github.com/Builder106/halberd && cd halberd
 go build -o bin/ ./cmd/...
 
 # Validate a policy bundle
