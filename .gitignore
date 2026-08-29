@@ -2,7 +2,10 @@
 /dist/
 /halberd.yaml
 *.jsonl
-.DS_Store
+coverage.out
+coverage/
+*.out
+*.tsbuildinfo
 
 # Staged copies of policies/ that the WASM build embeds. The source of
 # truth is policies/. Rebuild via scripts/build-wasm.sh.
