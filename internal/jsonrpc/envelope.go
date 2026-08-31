@@ -29,10 +29,11 @@ type Response struct {
 
 // Error is the JSON-RPC 2.0 error object embedded in a Response.
 type Error struct {
-	Code    int         `json:"code"`
-	Message string      `json:"message"`
-	Data    interface{} `json:"data,omitempty"`
+	Code    int    `json:"code"`
+	Message string `json:"message"`
+	Data    any    `json:"data,omitempty"`
 }
+
 
 // JSON-RPC 2.0 reserved error codes plus Halberd's policy-violation code.
 // CodePolicyViolation sits in the -32000..-32099 server-defined range.

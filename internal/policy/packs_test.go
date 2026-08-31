@@ -22,7 +22,7 @@ func packsDir(t *testing.T) string {
 type packScenario struct {
 	name    string
 	tool    string
-	args    map[string]interface{}
+	args    map[string]any
 	blocked bool
 }
 
@@ -36,11 +36,11 @@ func runPackScenarios(t *testing.T, bundlePath string, scenarios []packScenario)
 
 	for _, sc := range scenarios {
 		t.Run(sc.name, func(t *testing.T) {
-			payload, err := json.Marshal(map[string]interface{}{
+			payload, err := json.Marshal(map[string]any{
 				"jsonrpc": "2.0",
 				"id":      1,
 				"method":  "tools/call",
-				"params": map[string]interface{}{
+				"params": map[string]any{
 					"name":      sc.tool,
 					"arguments": sc.args,
 				},
@@ -61,37 +61,37 @@ func TestPack_Filesystem(t *testing.T) {
 		{
 			name:    "allow_relative_read",
 			tool:    "read_file",
-			args:    map[string]interface{}{"path": "src/main.go"},
+			args:    map[string]any{"path": "src/main.go"},
 			blocked: false,
 		},
 		{
 			name:    "block_absolute_path",
 			tool:    "read_file",
-			args:    map[string]interface{}{"path": "/etc/passwd"},
+			args:    map[string]any{"path": "/etc/passwd"},
 			blocked: true,
 		},
 		{
 			name:    "block_path_traversal",
 			tool:    "read_file",
-			args:    map[string]interface{}{"path": "../../etc/shadow"},
+			args:    map[string]any{"path": "../../etc/shadow"},
 			blocked: true,
 		},
 		{
 			name:    "block_home_expansion",
 			tool:    "read_file",
-			args:    map[string]interface{}{"path": "~/.ssh/id_rsa"},
+			args:    map[string]any{"path": "~/.ssh/id_rsa"},
 			blocked: true,
 		},
 		{
 			name:    "block_null_byte",
 			tool:    "read_file",
-			args:    map[string]interface{}{"path": "ok.txt\x00.png"},
+			args:    map[string]any{"path": "ok.txt\x00.png"},
 			blocked: true,
 		},
 		{
 			name:    "block_array_arg_tool",
 			tool:    "read_multiple_files", // intentionally undeclared
-			args:    map[string]interface{}{"paths": []string{"a.txt"}},
+			args:    map[string]any{"paths": []string{"a.txt"}},
 			blocked: true,
 		},
 	})
@@ -102,31 +102,31 @@ func TestPack_Git(t *testing.T) {
 		{
 			name:    "allow_status",
 			tool:    "git_status",
-			args:    map[string]interface{}{"repo_path": "."},
+			args:    map[string]any{"repo_path": "."},
 			blocked: false,
 		},
 		{
 			name:    "allow_log_on_branch",
 			tool:    "git_log",
-			args:    map[string]interface{}{"repo_path": "repo", "max_count": 10},
+			args:    map[string]any{"repo_path": "repo", "max_count": 10},
 			blocked: false,
 		},
 		{
 			name:    "block_long_opt_smuggling",
 			tool:    "git_diff",
-			args:    map[string]interface{}{"repo_path": ".", "target": "--upload-pack=ssh://attacker/x"},
+			args:    map[string]any{"repo_path": ".", "target": "--upload-pack=ssh://attacker/x"},
 			blocked: true,
 		},
 		{
 			name:    "block_ref_with_whitespace",
 			tool:    "git_checkout",
-			args:    map[string]interface{}{"repo_path": ".", "branch_name": "main; rm -rf /"},
+			args:    map[string]any{"repo_path": ".", "branch_name": "main; rm -rf /"},
 			blocked: true,
 		},
 		{
 			name:    "block_state_mutating_commit",
 			tool:    "git_commit", // intentionally undeclared
-			args:    map[string]interface{}{"repo_path": ".", "message": "x"},
+			args:    map[string]any{"repo_path": ".", "message": "x"},
 			blocked: true,
 		},
 	})
@@ -137,31 +137,31 @@ func TestPack_GitHub(t *testing.T) {
 		{
 			name:    "allow_get_issue_in_org",
 			tool:    "get_issue",
-			args:    map[string]interface{}{"owner": "your-org", "repo": "halberd", "issue_number": 42},
+			args:    map[string]any{"owner": "your-org", "repo": "halberd", "issue_number": 42},
 			blocked: false,
 		},
 		{
 			name:    "block_owner_outside_allowlist",
 			tool:    "get_issue",
-			args:    map[string]interface{}{"owner": "other-org", "repo": "halberd", "issue_number": 42},
+			args:    map[string]any{"owner": "other-org", "repo": "halberd", "issue_number": 42},
 			blocked: true,
 		},
 		{
 			name:    "block_repo_with_shell_metachar",
 			tool:    "get_issue",
-			args:    map[string]interface{}{"owner": "your-org", "repo": "halberd; rm -rf /", "issue_number": 1},
+			args:    map[string]any{"owner": "your-org", "repo": "halberd; rm -rf /", "issue_number": 1},
 			blocked: true,
 		},
 		{
 			name:    "block_invalid_state",
 			tool:    "list_issues",
-			args:    map[string]interface{}{"owner": "your-org", "repo": "halberd", "state": "deleted"},
+			args:    map[string]any{"owner": "your-org", "repo": "halberd", "state": "deleted"},
 			blocked: true,
 		},
 		{
 			name:    "block_dangerous_unknown_tool",
 			tool:    "delete_repository", // intentionally undeclared
-			args:    map[string]interface{}{"owner": "your-org", "repo": "halberd"},
+			args:    map[string]any{"owner": "your-org", "repo": "halberd"},
 			blocked: true,
 		},
 	})
@@ -174,19 +174,19 @@ func TestPack_Postgres(t *testing.T) {
 		{
 			name:    "allow_simple_select",
 			tool:    "query",
-			args:    map[string]interface{}{"sql": "SELECT id, name FROM students LIMIT 10"},
+			args:    map[string]any{"sql": "SELECT id, name FROM students LIMIT 10"},
 			blocked: false,
 		},
 		{
 			name:    "block_drop_table",
 			tool:    "query",
-			args:    map[string]interface{}{"sql": "DROP TABLE users"},
+			args:    map[string]any{"sql": "DROP TABLE users"},
 			blocked: true,
 		},
 		{
 			name:    "block_pg_read_server_files",
 			tool:    "query",
-			args:    map[string]interface{}{"sql": "SELECT pg_read_server_files('/etc/passwd')"},
+			args:    map[string]any{"sql": "SELECT pg_read_server_files('/etc/passwd')"},
 			blocked: true,
 		},
 	})

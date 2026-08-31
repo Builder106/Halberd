@@ -53,13 +53,13 @@ func TestEvaluateResponse_StripsANSIInMCPContent(t *testing.T) {
 	}
 	// Decode the rewritten payload and confirm the ESC bytes are gone but
 	// the surrounding structure is intact.
-	var msg map[string]interface{}
+	var msg map[string]any
 	if err := json.Unmarshal(r.Payload, &msg); err != nil {
 		t.Fatalf("rewritten payload is not valid JSON: %v\nraw: %s", err, r.Payload)
 	}
-	result := msg["result"].(map[string]interface{})
-	content := result["content"].([]interface{})
-	first := content[0].(map[string]interface{})
+	result := msg["result"].(map[string]any)
+	content := result["content"].([]any)
+	first := content[0].(map[string]any)
 	if first["text"].(string) != "hot path" {
 		t.Errorf("text = %q, want %q", first["text"], "hot path")
 	}

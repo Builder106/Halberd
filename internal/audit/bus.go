@@ -17,14 +17,15 @@ import (
 // Event is one audit record: the decision the policy engine made about one
 // JSON-RPC payload at one direction (request or response).
 type Event struct {
-	Time       time.Time   `json:"time"`
-	Direction  string      `json:"direction"`
-	Method     string      `json:"method,omitempty"`
-	Tool       string      `json:"tool,omitempty"`
-	Blocked    bool        `json:"blocked"`
-	Violations interface{} `json:"violations,omitempty"`
-	RemoteAddr string      `json:"remote_addr,omitempty"`
+	Time       time.Time `json:"time"`
+	Direction  string    `json:"direction"`
+	Method     string    `json:"method,omitempty"`
+	Tool       string    `json:"tool,omitempty"`
+	Blocked    bool      `json:"blocked"`
+	Violations any       `json:"violations,omitempty"`
+	RemoteAddr string    `json:"remote_addr,omitempty"`
 }
+
 
 // Bus is a non-blocking audit sink: callers push Events on the hot path,
 // a single goroutine drains them to JSONL. Events are dropped (not blocked

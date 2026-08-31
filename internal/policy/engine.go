@@ -69,8 +69,8 @@ func (e *Engine) EvaluateRequest(payload []byte) Decision {
 
 func (e *Engine) evaluateToolCall(raw json.RawMessage) Decision {
 	var params struct {
-		Name      string                 `json:"name"`
-		Arguments map[string]interface{} `json:"arguments"`
+		Name      string         `json:"name"`
+		Arguments map[string]any `json:"arguments"`
 	}
 	if err := json.Unmarshal(raw, &params); err != nil {
 		return Decision{
@@ -114,7 +114,7 @@ func (e *Engine) evaluateToolCall(raw json.RawMessage) Decision {
 	}
 }
 
-func evaluateArg(tool, name string, val interface{}, rule ArgumentRule) []Violation {
+func evaluateArg(tool, name string, val any, rule ArgumentRule) []Violation {
 	str, ok := val.(string)
 	if !ok {
 		if rule.Type == "string" {
