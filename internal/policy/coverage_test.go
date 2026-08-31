@@ -22,7 +22,7 @@ defaults:
   unknown_tool: deny
   unknown_method: log_and_pass
 `)
-	if err := os.WriteFile(bundlePath, content, 0600); err != nil {
+	if err := os.WriteFile(bundlePath, content, 0644); err != nil {
 		t.Fatalf("failed to write tmp bundle: %v", err)
 	}
 
