@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"errors"
 	"strings"
 	"sync"
 	"sync/atomic"
@@ -210,4 +211,34 @@ func (g *gate) release() {
 	default:
 		close(g.ch)
 	}
+}
+
+type errWriter struct {
+	err error
+}
+
+func (e *errWriter) Write(_ []byte) (int, error) {
+	return 0, e.err
+}
+
+func TestBus_SinkError(t *testing.T) {
+	// Normal drain error path
+	ew := &errWriter{err: errors.New("write failed")}
+	bus := NewBus(ew, 4)
+	bus.Record(Event{Direction: "request"})
+	time.Sleep(10 * time.Millisecond)
+	_ = bus.Stop(context.Background())
+
+	// Stop drain error path (done already closed with buffered events)
+	b := &Bus{
+		ch:   make(chan Event, 8),
+		done: make(chan struct{}),
+		sink: &errWriter{err: errors.New("drain write failed")},
+	}
+	for i := 0; i < 5; i++ {
+		b.ch <- Event{Direction: "req"}
+	}
+	close(b.done)
+	b.wg.Add(1)
+	b.drain()
 }
