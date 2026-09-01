@@ -390,3 +390,283 @@ func (s *syncBuf) String() string {
 	defer s.mu.Unlock()
 	return s.b.String()
 }
+
+func TestStdio_Helpers(t *testing.T) {
+	// peekMethodTool
+	m, tool := peekMethodTool([]byte("invalid json"))
+	if m != "" || tool != "" {
+		t.Errorf("expected empty on invalid json, got %q, %q", m, tool)
+	}
+
+	// extractID
+	if _, ok := extractID([]byte("invalid json")); ok {
+		t.Error("expected ok=false on invalid json")
+	}
+	if _, ok := extractID([]byte("{}")); ok {
+		t.Error("expected ok=false when ID is absent")
+	}
+	if id, ok := extractID([]byte(`{"id":123}`)); !ok || string(id) != "123" {
+		t.Errorf("expected 123, got %s, %v", string(id), ok)
+	}
+
+	// summarize
+	if s := summarize(policy.Decision{}); s != "halberd: request blocked by policy" {
+		t.Errorf("unexpected summarize empty: %s", s)
+	}
+	if s := summarize(policy.Decision{Violations: []policy.Violation{{Rule: "unknown_tool", Tool: "bash"}}}); s != "halberd: unknown_tool on bash" {
+		t.Errorf("unexpected summarize tool: %s", s)
+	}
+	if s := summarize(policy.Decision{Violations: []policy.Violation{{Rule: "deny_pattern", Field: "sql"}}}); s != "halberd: deny_pattern on sql" {
+		t.Errorf("unexpected summarize field: %s", s)
+	}
+}
+
+type failingReader struct {
+	err error
+}
+
+func (f *failingReader) Read(_ []byte) (int, error) {
+	return 0, f.err
+}
+
+type failAfterNWriter struct {
+	n   int
+	err error
+}
+
+func (f *failAfterNWriter) Write(p []byte) (int, error) {
+	if f.n <= 0 {
+		return 0, f.err
+	}
+	f.n--
+	return len(p), nil
+}
+
+func (f *failAfterNWriter) Close() error {
+	return nil
+}
+
+type blockingReadCloser struct {
+	readStarted chan struct{}
+	readDone    chan struct{}
+	closed      chan struct{}
+	startOnce   sync.Once
+	closeOnce   sync.Once
+}
+
+func newBlockingReadCloser() *blockingReadCloser {
+	return &blockingReadCloser{
+		readStarted: make(chan struct{}),
+		readDone:    make(chan struct{}),
+		closed:      make(chan struct{}),
+	}
+}
+
+func (r *blockingReadCloser) Read(_ []byte) (int, error) {
+	r.startOnce.Do(func() { close(r.readStarted) })
+	<-r.closed
+	close(r.readDone)
+	return 0, io.ErrClosedPipe
+}
+
+func (r *blockingReadCloser) Close() error {
+	r.closeOnce.Do(func() { close(r.closed) })
+	return nil
+}
+
+func TestWrap_ContextCancellation(t *testing.T) {
+	bundle, _ := policy.ParseBundle([]byte(testBundle))
+	engine := policy.New(bundle)
+	bus := audit.NewBus(&bytes.Buffer{}, 16)
+	defer func() { _ = bus.Stop(context.Background()) }()
+
+	ctx, cancel := context.WithCancel(context.Background())
+	hostIn := newBlockingReadCloser()
+	childStdout := newBlockingReadCloser()
+	childStderr := newBlockingReadCloser()
+	t.Cleanup(func() {
+		_ = hostIn.Close()
+		_ = childStdout.Close()
+		_ = childStderr.Close()
+	})
+
+	wrapDone := make(chan error, 1)
+	go func() {
+		wrapDone <- Wrap(ctx, engine, bus,
+			HostStreams{In: hostIn, Out: io.Discard, Err: io.Discard},
+			ChildStreams{
+				Stdin:  &failAfterNWriter{n: 1},
+				Stdout: childStdout,
+				Stderr: childStderr,
+			})
+	}()
+
+	for _, started := range []<-chan struct{}{hostIn.readStarted, childStdout.readStarted, childStderr.readStarted} {
+		select {
+		case <-started:
+		case <-time.After(2 * time.Second):
+			t.Fatal("stdio worker did not block on its input")
+		}
+	}
+
+	cancel()
+	select {
+	case err := <-wrapDone:
+		if err != context.Canceled {
+			t.Fatalf("expected context.Canceled, got %v", err)
+		}
+	case <-time.After(2 * time.Second):
+		t.Fatal("Wrap did not return after cancellation")
+	}
+
+	for _, stopped := range []<-chan struct{}{hostIn.readDone, childStdout.readDone, childStderr.readDone} {
+		select {
+		case <-stopped:
+		default:
+			t.Fatal("Wrap returned before a blocked stdio worker stopped")
+		}
+	}
+}
+
+func TestWrap_WriteHostErrorPaths(t *testing.T) {
+	bundle, _ := policy.ParseBundle([]byte(testBundle))
+	engine := policy.New(bundle)
+	bus := audit.NewBus(&bytes.Buffer{}, 16)
+	defer func() { _ = bus.Stop(context.Background()) }()
+
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+
+	// 1. Error on writing blocked response to host
+	hostInR, hostInW := io.Pipe()
+	childInR, childInW := io.Pipe()
+	childOutR, childOutW := io.Pipe()
+	go func() {
+		_ = Wrap(ctx, engine, bus, HostStreams{
+			In:  hostInR,
+			Out: &failAfterNWriter{n: 0, err: io.ErrClosedPipe},
+			Err: io.Discard,
+		}, ChildStreams{
+			Stdin:  childInW,
+			Stdout: childOutR,
+			Stderr: bytes.NewReader(nil),
+		})
+	}()
+
+	req := `{"jsonrpc":"2.0","id":1,"method":"tools/call","params":{"name":"query","arguments":{"sql":"DROP TABLE users"}}}`
+	_, _ = hostInW.Write([]byte(req + "\n"))
+	time.Sleep(20 * time.Millisecond)
+	_ = hostInW.Close()
+	_ = childInR.Close()
+	_ = childOutW.Close()
+}
+
+func TestWrap_ChildStdinWriteError(t *testing.T) {
+	bundle, _ := policy.ParseBundle([]byte(testBundle))
+	engine := policy.New(bundle)
+	bus := audit.NewBus(&bytes.Buffer{}, 16)
+	defer func() { _ = bus.Stop(context.Background()) }()
+
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+
+	hostInR, hostInW := io.Pipe()
+	childOutR, childOutW := io.Pipe()
+	go func() {
+		_ = Wrap(ctx, engine, bus, HostStreams{
+			In:  hostInR,
+			Out: io.Discard,
+			Err: io.Discard,
+		}, ChildStreams{
+			Stdin:  &failAfterNWriter{n: 0, err: io.ErrClosedPipe},
+			Stdout: childOutR,
+			Stderr: bytes.NewReader(nil),
+		})
+	}()
+
+	req := `{"jsonrpc":"2.0","id":1,"method":"tools/call","params":{"name":"query","arguments":{"sql":"SELECT 1"}}}`
+	_, _ = hostInW.Write([]byte(req + "\n"))
+	time.Sleep(20 * time.Millisecond)
+	_ = hostInW.Close()
+	_ = childOutW.Close()
+
+	// Test second write failure (newline write failure)
+	hostInR2, hostInW2 := io.Pipe()
+	childOutR2, _ := io.Pipe()
+	go func() {
+		_ = Wrap(ctx, engine, bus, HostStreams{
+			In:  hostInR2,
+			Out: io.Discard,
+			Err: io.Discard,
+		}, ChildStreams{
+			Stdin:  &failAfterNWriter{n: 1, err: io.ErrClosedPipe},
+			Stdout: childOutR2,
+			Stderr: bytes.NewReader(nil),
+		})
+	}()
+
+	_, _ = hostInW2.Write([]byte(req + "\n"))
+	time.Sleep(20 * time.Millisecond)
+	_ = hostInW2.Close()
+	_ = childOutR2.Close()
+}
+
+func TestWrap_ScanErrorsAndChildErrors(t *testing.T) {
+	bundle, _ := policy.ParseBundle([]byte(testBundle))
+	engine := policy.New(bundle)
+	bus := audit.NewBus(&bytes.Buffer{}, 16)
+	defer func() { _ = bus.Stop(context.Background()) }()
+
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+
+	childInR, childInW := io.Pipe()
+	defer func() { _ = childInR.Close(); _ = childInW.Close() }()
+
+	// Scanner error on host In, error on child Stdout, and error on child Stderr
+	errHostIn := &failingReader{err: io.ErrUnexpectedEOF}
+	errChildOut := &failingReader{err: io.ErrUnexpectedEOF}
+	errChildErr := &failingReader{err: io.ErrUnexpectedEOF}
+
+	_ = Wrap(ctx, engine, bus, HostStreams{
+		In:  errHostIn,
+		Out: io.Discard,
+		Err: io.Discard,
+	}, ChildStreams{
+		Stdin:  childInW,
+		Stdout: errChildOut,
+		Stderr: errChildErr,
+	})
+}
+
+func TestWrap_ChildStdoutWriteHostError(t *testing.T) {
+	bundle, _ := policy.ParseBundle([]byte(testBundle))
+	engine := policy.New(bundle)
+	bus := audit.NewBus(&bytes.Buffer{}, 16)
+	defer func() { _ = bus.Stop(context.Background()) }()
+
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+
+	hostInR, hostInW := io.Pipe()
+	defer func() { _ = hostInR.Close(); _ = hostInW.Close() }()
+	childInR, childInW := io.Pipe()
+	defer func() { _ = childInR.Close(); _ = childInW.Close() }()
+	childOutR, childOutW := io.Pipe()
+
+	go func() {
+		_ = Wrap(ctx, engine, bus, HostStreams{
+			In:  hostInR,
+			Out: &failAfterNWriter{n: 0, err: io.ErrClosedPipe},
+			Err: io.Discard,
+		}, ChildStreams{
+			Stdin:  childInW,
+			Stdout: childOutR,
+			Stderr: bytes.NewReader(nil),
+		})
+	}()
+
+	_, _ = childOutW.Write([]byte(`{"jsonrpc":"2.0","id":1,"result":{}}` + "\n"))
+	time.Sleep(20 * time.Millisecond)
+	_ = childOutW.Close()
+}

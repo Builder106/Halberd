@@ -54,8 +54,10 @@ type ChildStreams struct {
 // transparently to the host's stderr so server diagnostics still surface.
 //
 // Wrap returns when ctx is cancelled, when the host closes its input, or
-// when the child closes its output. The caller is responsible for
-// reaping the child process and exposing its exit status.
+// when the child closes its output. On cancellation it closes every
+// closable pipe endpoint and waits for the I/O workers to stop before
+// returning. The caller is responsible for reaping the child process and
+// exposing its exit status.
 func Wrap(ctx context.Context, engine *policy.Engine, bus *audit.Bus, host HostStreams, child ChildStreams) error {
 	var outMu sync.Mutex
 	writeHostLine := func(b []byte) error {
@@ -64,11 +66,8 @@ func Wrap(ctx context.Context, engine *policy.Engine, bus *audit.Bus, host HostS
 		if _, err := host.Out.Write(b); err != nil {
 			return err
 		}
-		if len(b) == 0 || b[len(b)-1] != '\n' {
-			_, err := host.Out.Write([]byte{'\n'})
-			return err
-		}
-		return nil
+		_, err := host.Out.Write([]byte{'\n'})
+		return err
 	}
 
 	var wg sync.WaitGroup
@@ -101,11 +100,7 @@ func Wrap(ctx context.Context, engine *policy.Engine, bus *audit.Bus, host HostS
 					// the audit entry above is the only record.
 					continue
 				}
-				resp, err := jsonrpc.PolicyViolation(id, summarize(decision), decision.Violations)
-				if err != nil {
-					slog.Error("synthesize policy-violation response", "err", err)
-					continue
-				}
+				resp, _ := jsonrpc.PolicyViolation(id, summarize(decision), decision.Violations)
 				if err := writeHostLine(resp); err != nil {
 					slog.Error("write blocked response to host", "err", err)
 					return
@@ -183,8 +178,21 @@ func Wrap(ctx context.Context, engine *policy.Engine, bus *audit.Bus, host HostS
 	case <-done:
 		return nil
 	case <-ctx.Done():
+		closeReader(host.In)
+		_ = child.Stdin.Close()
+		closeReader(child.Stdout)
+		closeReader(child.Stderr)
+		<-done
 		return ctx.Err()
 	}
+}
+
+func closeReader(r io.Reader) {
+	closer, ok := r.(io.Closer)
+	if !ok {
+		return
+	}
+	_ = closer.Close()
 }
 
 func peekMethodTool(line []byte) (method, tool string) {
