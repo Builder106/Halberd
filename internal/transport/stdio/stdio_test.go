@@ -528,7 +528,7 @@ func TestWrap_ContextCancellation(t *testing.T) {
 	}
 }
 
-func TestWrap_WriteHostErrorPaths(t *testing.T) {
+func TestWrap_WriteHostErrorPaths(_ *testing.T) {
 	bundle, _ := policy.ParseBundle([]byte(testBundle))
 	engine := policy.New(bundle)
 	bus := audit.NewBus(&bytes.Buffer{}, 16)
@@ -561,7 +561,7 @@ func TestWrap_WriteHostErrorPaths(t *testing.T) {
 	_ = childOutW.Close()
 }
 
-func TestWrap_ChildStdinWriteError(t *testing.T) {
+func TestWrap_ChildStdinWriteError(_ *testing.T) {
 	bundle, _ := policy.ParseBundle([]byte(testBundle))
 	engine := policy.New(bundle)
 	bus := audit.NewBus(&bytes.Buffer{}, 16)
@@ -611,7 +611,7 @@ func TestWrap_ChildStdinWriteError(t *testing.T) {
 	_ = childOutR2.Close()
 }
 
-func TestWrap_ScanErrorsAndChildErrors(t *testing.T) {
+func TestWrap_ScanErrorsAndChildErrors(_ *testing.T) {
 	bundle, _ := policy.ParseBundle([]byte(testBundle))
 	engine := policy.New(bundle)
 	bus := audit.NewBus(&bytes.Buffer{}, 16)
