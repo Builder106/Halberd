@@ -8,8 +8,8 @@ package http
 import (
 	"bytes"
 	"encoding/json"
+	"errors"
 	"io"
-	"log/slog"
 	"net/http"
 	"net/http/httputil"
 	"net/url"
@@ -23,7 +23,7 @@ import (
 
 const (
 	maxRequestBytes  = 4 << 20 // 4 MiB ceiling on JSON-RPC envelope
-	maxResponseBytes = 8 << 20 // 8 MiB ceiling on response body before we buffer
+	maxResponseBytes = 8 << 20 // Maximum buffered response body (8 MiB)
 )
 
 // NewHandler returns an http.Handler that reverse-proxies JSON-RPC requests
@@ -53,11 +53,14 @@ func NewHandler(target *url.URL, engine *policy.Engine, bus *audit.Bus) http.Han
 			if strings.HasPrefix(resp.Header.Get("Content-Type"), "text/event-stream") {
 				return nil
 			}
-			body, err := io.ReadAll(io.LimitReader(resp.Body, maxResponseBytes))
+			body, err := io.ReadAll(io.LimitReader(resp.Body, maxResponseBytes+1))
 			if err != nil {
 				return err
 			}
 			_ = resp.Body.Close()
+			if len(body) > maxResponseBytes {
+				return errors.New("upstream response body exceeds size limit")
+			}
 
 			result := engine.EvaluateResponse(body)
 			if len(result.Detections) > 0 {
@@ -119,12 +122,7 @@ func writePolicyViolation(w http.ResponseWriter, requestBody []byte, d policy.De
 		summary = "halberd: " + d.Violations[0].Rule + " on " + d.Violations[0].Field
 	}
 
-	resp, err := jsonrpc.PolicyViolation(id, summary, d.Violations)
-	if err != nil {
-		slog.Error("synthesize policy-violation response", "error", err)
-		http.Error(w, "policy violation (response encode failed)", http.StatusForbidden)
-		return
-	}
+	resp, _ := jsonrpc.PolicyViolation(id, summary, d.Violations)
 
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK) // JSON-RPC errors ride a 200 with error in body
