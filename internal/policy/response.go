@@ -60,13 +60,7 @@ func (e *Engine) EvaluateResponse(payload []byte) ResponseResult {
 	}
 
 	env.Result = newResult
-	out, err := json.Marshal(env)
-	if err != nil {
-		// Re-serialization should not fail since input was valid JSON; if
-		// it ever does, fall back to forwarding the original bytes rather
-		// than dropping the response.
-		return ResponseResult{Payload: payload, Detections: detections}
-	}
+	out, _ := json.Marshal(env)
 	return ResponseResult{Payload: out, Modified: true, Detections: detections}
 }
 
@@ -83,10 +77,7 @@ func sanitizeJSONNode(raw json.RawMessage, path string, filter *GlobalResponseFi
 		if newS == s {
 			return raw, nil, false
 		}
-		out, err := json.Marshal(newS)
-		if err != nil {
-			return raw, detections, false
-		}
+		out, _ := json.Marshal(newS)
 		return out, detections, true
 	}
 
@@ -106,10 +97,7 @@ func sanitizeJSONNode(raw json.RawMessage, path string, filter *GlobalResponseFi
 		if !modified {
 			return raw, allDet, false
 		}
-		out, err := json.Marshal(arr)
-		if err != nil {
-			return raw, allDet, false
-		}
+		out, _ := json.Marshal(arr)
 		return out, allDet, true
 	}
 
@@ -129,10 +117,7 @@ func sanitizeJSONNode(raw json.RawMessage, path string, filter *GlobalResponseFi
 		if !modified {
 			return raw, allDet, false
 		}
-		out, err := json.Marshal(obj)
-		if err != nil {
-			return raw, allDet, false
-		}
+		out, _ := json.Marshal(obj)
 		return out, allDet, true
 	}
 
