@@ -244,7 +244,7 @@ func TestProxy_NonPostPassesThrough(t *testing.T) {
 }
 
 func TestProxy_RequestBodyTooLarge(t *testing.T) {
-	h, _, cleanup := newTestProxy(t, http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {}))
+	h, _, cleanup := newTestProxy(t, http.HandlerFunc(func(_ http.ResponseWriter, _ *http.Request) {}))
 	defer cleanup()
 
 	// 5MB body exceeds maxRequestBytes (4MB)
@@ -259,7 +259,7 @@ func TestProxy_RequestBodyTooLarge(t *testing.T) {
 }
 
 func TestProxy_MalformedJSON(t *testing.T) {
-	h, _, cleanup := newTestProxy(t, http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {}))
+	h, _, cleanup := newTestProxy(t, http.HandlerFunc(func(_ http.ResponseWriter, _ *http.Request) {}))
 	defer cleanup()
 
 	w := httptest.NewRecorder()
@@ -300,7 +300,7 @@ func TestProxy_SSEResponsePassthrough(t *testing.T) {
 
 func TestProxy_BlockSummaryWithoutField(t *testing.T) {
 	// Unknown tool blocked without field
-	h, _, cleanup := newTestProxy(t, http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {}))
+	h, _, cleanup := newTestProxy(t, http.HandlerFunc(func(_ http.ResponseWriter, _ *http.Request) {}))
 	defer cleanup()
 
 	w := httptest.NewRecorder()
