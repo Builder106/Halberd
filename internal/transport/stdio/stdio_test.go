@@ -639,7 +639,7 @@ func TestWrap_ScanErrorsAndChildErrors(_ *testing.T) {
 	})
 }
 
-func TestWrap_ChildStdoutWriteHostError(t *testing.T) {
+func TestWrap_ChildStdoutWriteHostError(_ *testing.T) {
 	bundle, _ := policy.ParseBundle([]byte(testBundle))
 	engine := policy.New(bundle)
 	bus := audit.NewBus(&bytes.Buffer{}, 16)

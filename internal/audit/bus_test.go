@@ -221,7 +221,7 @@ func (e *errWriter) Write(_ []byte) (int, error) {
 	return 0, e.err
 }
 
-func TestBus_SinkError(t *testing.T) {
+func TestBus_SinkError(_ *testing.T) {
 	// Normal drain error path
 	ew := &errWriter{err: errors.New("write failed")}
 	bus := NewBus(ew, 4)
