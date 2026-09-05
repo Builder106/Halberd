@@ -2,7 +2,7 @@ name: CI
 
 on:
   push:
-    branches: [main]
+    branches: [main, staging]
   pull_request:
 
 permissions:
@@ -218,3 +218,28 @@ jobs:
             web/playwright-report/
             web/test-results/
           retention-days: 7
+
+  deploy:
+    name: Deploy to Vercel
+    needs: [secrets, bench, govulncheck, web]
+    if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/staging')
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Trigger Vercel deploy hook
+        env:
+          VERCEL_DEPLOY_HOOK_STAGING: ${{ secrets.VERCEL_DEPLOY_HOOK_STAGING }}
+          VERCEL_DEPLOY_HOOK_PROD: ${{ secrets.VERCEL_DEPLOY_HOOK_PROD }}
+        run: |
+          if [ "${{ github.ref }}" = "refs/heads/staging" ]; then
+            if [ -z "$VERCEL_DEPLOY_HOOK_STAGING" ]; then
+              echo "Notice: VERCEL_DEPLOY_HOOK_STAGING is not set; skipping deploy."
+              exit 0
+            fi
+            curl -sS -f -X POST "$VERCEL_DEPLOY_HOOK_STAGING"
+          elif [ "${{ github.ref }}" = "refs/heads/main" ]; then
+            if [ -z "$VERCEL_DEPLOY_HOOK_PROD" ]; then
+              echo "Error: VERCEL_DEPLOY_HOOK_PROD is required but not set."
+              exit 1
+            fi
+            curl -sS -f -X POST "$VERCEL_DEPLOY_HOOK_PROD"
+          fi
