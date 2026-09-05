@@ -23,3 +23,6 @@ coverage/
 /web/blob-report/
 /web/playwright/.cache/
 .vscode/settings.json
+
+# Companion demo videos (regenerable from GIFs)
+/assets/demo/*.webm
